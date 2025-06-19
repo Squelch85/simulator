@@ -19,8 +19,8 @@
     .control .reset {background:#a00;}
     .blink {animation:blink 1s infinite alternate;}
     @keyframes blink {from{opacity:1;} to{opacity:0.2;}}
-    /* 높이를 이전 60vh에서 30% 증가한 78vh로 설정 */
-    .scroll-area {max-height:78vh; overflow-y:auto;}
+    /* 세로 제한 제거, 반응형 스크롤 영역 */
+    .scroll-area {flex:1; overflow-y:auto;}
     table {width:100%; border-collapse:collapse; font-size:0.9rem;}
     th, td {padding:8px; border:1px solid #444; text-align:center; font-weight:500;}
     th {background:#2a2a2a;}
@@ -79,7 +79,7 @@
       const sorted = [...itemTable].sort((a,b)=> results[b.name]-results[a.name] || a.rate-b.rate);
       sorted.forEach(item=>{
         const tr = document.createElement('tr');
-        ['name','rate','expected','actual'].forEach((key,idx)=>{
+        ['name','rate','expected','actual'].forEach(key=>{
           const td = document.createElement('td');
           if(key==='name'){ td.textContent=item.name; td.style.color=getColor(item.rate); }
           if(key==='rate') td.textContent=item.rate.toFixed(3);
