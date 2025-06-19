@@ -10,8 +10,8 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <style>
-    html, body {margin:0; padding:0; min-height:100%; background:#1e1e1e; color:#eee; font-family:'Segoe UI', sans-serif;}
-    .container {max-width:600px; margin:auto; padding:12px; display:flex; flex-direction:column; height:100vh;}
+    html, body {margin:0; padding:0; background:#1e1e1e; color:#eee; font-family:'Segoe UI', sans-serif;}
+    .container {max-width:600px; margin:auto; padding:12px; display:flex; flex-direction:column;}
     h3 {text-align:center; font-size:1.4em; margin:12px 0;}
     .control {display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:8px; margin-bottom:12px;}
     .control button, .control input[type=number] {font-size:1rem; padding:6px 12px; border-radius:4px; border:none; background:#333; color:#eee;}
@@ -19,9 +19,8 @@
     .control .reset {background:#a00;}
     .blink {animation:blink 1s infinite alternate;}
     @keyframes blink {from{opacity:1;} to{opacity:0.2;}}
-    /* 세로 제한 제거, 반응형 스크롤 영역 */
-    .scroll-area {flex:1; overflow-y:auto;}
-    table {width:100%; border-collapse:collapse; font-size:0.9rem;}
+    /* 내부 스크롤 제거로 전체 페이지 스크롤 사용 */
+    table {width:100%; border-collapse:collapse; font-size:0.9rem; margin-bottom:20px;}
     th, td {padding:8px; border:1px solid #444; text-align:center; font-weight:500;}
     th {background:#2a2a2a;}
   </style>
@@ -38,58 +37,73 @@
       <button id="reset" class="reset">초기화</button>
       <button id="run">실행</button>
     </div>
-    <div class="scroll-area">
-      <table>
-        <thead>
-          <tr><th>아이템</th><th>확률%</th><th>기대</th><th>실제</th></tr>
-        </thead>
-        <tbody id="resultBody"></tbody>
-      </table>
-    </div>
+    <table>
+      <thead>
+        <tr><th>아이템</th><th>확률%</th><th>기대</th><th>실제</th></tr>
+      </thead>
+      <tbody id="resultBody"></tbody>
+    </table>
   </div>
   <script>
     const maxTries = 10000;
     const input = document.getElementById('tries');
-    ['minus5','minus1','plus1','plus5'].forEach(id=>{
-      document.getElementById(id).addEventListener('click', ()=>{
-        let v = parseInt(input.value)||0;
+    ['minus5','minus1','plus1','plus5'].forEach(id => {
+      document.getElementById(id).addEventListener('click', () => {
+        let v = parseInt(input.value) || 0;
         const delta = id.includes('minus') ? -parseInt(id.replace('minus','')) : parseInt(id.replace('plus',''));
         v = Math.min(Math.max(v + delta, 1), maxTries);
         input.value = v;
-        if(v===maxTries) input.classList.add('blink'); else input.classList.remove('blink');
+        input.classList.toggle('blink', v === maxTries);
       });
     });
-    document.getElementById('reset').addEventListener('click', ()=>{
-      input.value = 100; input.classList.remove('blink');
+    document.getElementById('reset').addEventListener('click', () => {
+      input.value = 100;
+      input.classList.remove('blink');
     });
     document.getElementById('run').addEventListener('click', runSimulation);
 
     const itemTable = [ /* ... same items array ... */ ];
-    function getColor(rate){ if(rate<=0.01) return '#c678dd'; if(rate<=0.1) return '#ff9900'; if(rate<=0.5) return '#fcd303'; if(rate<=3) return '#ff5555'; if(rate<=10) return '#55aaff'; if(rate<=25) return '#aaa'; return '#fff'; }
+    function getColor(rate) {
+      if (rate <= 0.01) return '#c678dd';
+      if (rate <= 0.1) return '#ff9900';
+      if (rate <= 0.5) return '#fcd303';
+      if (rate <= 3) return '#ff5555';
+      if (rate <= 10) return '#55aaff';
+      if (rate <= 25) return '#aaa';
+      return '#fff';
+    }
 
-    function runSimulation(){
-      const tries = Math.min(Math.max(parseInt(input.value)||1,1),maxTries);
+    function runSimulation() {
+      const tries = Math.min(Math.max(parseInt(input.value) || 1, 1), maxTries);
       const results = {};
-      itemTable.forEach(item=>results[item.name]=0);
-      for(let i=0;i<tries;i++){
-        let r=Math.random()*100, cum=0;
-        for(let item of itemTable){ cum+=item.rate; if(r<=cum){ results[item.name]++; break; }}
+      itemTable.forEach(item => results[item.name] = 0);
+      for (let i = 0; i < tries; i++) {
+        let r = Math.random() * 100, cum = 0;
+        for (let item of itemTable) {
+          cum += item.rate;
+          if (r <= cum) {
+            results[item.name]++;
+            break;
+          }
+        }
       }
       const frag = document.createDocumentFragment();
-      const sorted = [...itemTable].sort((a,b)=> results[b.name]-results[a.name] || a.rate-b.rate);
-      sorted.forEach(item=>{
+      const sorted = [...itemTable].sort((a, b) => results[b.name] - results[a.name] || a.rate - b.rate);
+      sorted.forEach(item => {
         const tr = document.createElement('tr');
-        ['name','rate','expected','actual'].forEach(key=>{
+        ['name','rate','expected','actual'].forEach(key => {
           const td = document.createElement('td');
-          if(key==='name'){ td.textContent=item.name; td.style.color=getColor(item.rate); }
-          if(key==='rate') td.textContent=item.rate.toFixed(3);
-          if(key==='expected') td.textContent=((item.rate/100)*tries).toFixed(1);
-          if(key==='actual') td.textContent=results[item.name];
+          if (key === 'name') { td.textContent = item.name; td.style.color = getColor(item.rate); }
+          if (key === 'rate') td.textContent = item.rate.toFixed(3);
+          if (key === 'expected') td.textContent = ((item.rate/100) * tries).toFixed(1);
+          if (key === 'actual') td.textContent = results[item.name];
           tr.appendChild(td);
         });
         frag.appendChild(tr);
       });
-      const tbody = document.getElementById('resultBody'); tbody.innerHTML=''; tbody.appendChild(frag);
+      const tbody = document.getElementById('resultBody');
+      tbody.innerHTML = '';
+      tbody.appendChild(frag);
     }
   </script>
 </body>
