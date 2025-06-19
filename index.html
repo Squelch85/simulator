@@ -8,7 +8,7 @@
     html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
+      min-height: 100%;
       background: #1e1e1e;
       color: white;
       font-family: 'Segoe UI', sans-serif;
@@ -19,7 +19,6 @@
       max-width: 600px;
       margin: auto;
       padding: 10px;
-      height: 100vh;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
@@ -63,7 +62,7 @@
     }
 
     .scroll-area {
-      flex: 1;
+      max-height: 60vh;
       overflow-y: auto;
     }
 
@@ -153,10 +152,10 @@
 
       for (let i = 0; i < tries; i++) {
         const r = Math.random() * 100;
-        let cumulative = 0;
+        let cum = 0;
         for (let item of itemTable) {
-          cumulative += item.rate;
-          if (r <= cumulative) {
+          cum += item.rate;
+          if (r <= cum) {
             results[item.name]++;
             break;
           }
