@@ -2,133 +2,142 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>6월 선물 시뮬레이터</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta property="og:title" content="🎁 6월 선물 시뮬레이터">
-  <meta property="og:description" content="확률형 아이템 뽑기 결과를 모바일/PC 최적화 UI로 확인해 보세요!">
-  <meta property="og:image" content="https://your.domain/path/to/preview.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
+  <title>찬란한 6월의 선물 랜덤 상자 시뮬레이터</title>
   <style>
-    html, body { margin:0; padding:0; background:#1e1e1e; color:#eee; font-family:'Segoe UI',sans-serif; }
-    .container { max-width:600px; margin:auto; padding:12px; }
-    h3 { text-align:center; font-size:1.4em; margin:12px 0; }
-    .control { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:8px; margin-bottom:12px; }
-    .control button, .control input[type=number] { font-size:1rem; padding:6px 12px; border-radius:4px; border:none; background:#333; color:#eee; }
-    .control button:active { transform:scale(0.98); }
-    .control .reset { background:#a00; }
-    .blink { animation:blink 1s infinite alternate; }
-    @keyframes blink { from{opacity:1;} to{opacity:0.2;} }
-    table { width:100%; border-collapse:collapse; font-size:0.9rem; }
-    th, td { padding:8px; border:1px solid #444; text-align:center; font-weight:500; }
-    th { background:#2a2a2a; }
+    /* 기본 스타일 */
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; background-color: #f4f4f4; color: #000; }
+    .container { width: 100%; max-width: 600px; margin: 20px; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    h1 { text-align: center; font-size: 1.5rem; margin-bottom: 1rem; font-weight: bold; }
+    .controls { display: flex; gap: 5px; align-items: center; margin-bottom: 1rem; }
+    .controls button { flex: 1; padding: 0.5rem; font-size: 1rem; font-weight: bold; border: 1px solid #ccc; border-radius: 4px; background: #eee; cursor: pointer; }
+    .controls button:hover { background: #ddd; }
+    .controls input { width: 100px; padding: 0.5rem; font-size: 1rem; text-align: center; border: 1px solid #ccc; border-radius: 4px; }
+    button#runBtn { width: 100%; padding: 0.75rem; font-size: 1rem; background-color: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    button#runBtn:hover { background-color: #0056b3; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: center; font-weight: bold; }
+    th { background-color: #f2f2f2; }
+    /* 희소도별 텍스트 색상 */
+    .rarity-purple { color: #800080; }
+    .rarity-gold   { color: #FFD700; }
+    .rarity-yellow { color: #CCCC00; }
+    .rarity-blue   { color: #0000FF; }
+    .rarity-green  { color: #008000; }
+    .rarity-grey   { color: #808080; }
+    /* 다크 모드 */
+    @media (prefers-color-scheme: dark) {
+      body { background-color: #121212; color: #e0e0e0; }
+      .container { background: #1e1e1e; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+      th { background-color: #2c2c2c; }
+      td, th { border-color: #333; }
+      .controls button, .controls input { background: #2c2c2c; color: #e0e0e0; border: 1px solid #555; }
+      .controls button:hover { background: #3a3a3a; }
+    }
+    @media (max-width: 480px) { h1 { font-size: 1.25rem; } button#runBtn, .controls button, .controls input { font-size: 0.9rem; } }
   </style>
 </head>
 <body>
   <div class="container">
-    <h3>🎁 6월 선물 시뮬레이터</h3>
-    <div class="control">
-      <button id="minus5">-5</button>
-      <button id="minus1">-1</button>
-      <input type="number" id="tries" value="100" min="1" max="10000">
-      <button id="plus1">+1</button>
-      <button id="plus5">+5</button>
-      <button id="reset" class="reset">초기화</button>
-      <button id="run">실행</button>
+    <h1>찬란한 6월의 선물 랜덤 상자 시뮬레이터</h1>
+    <div class="controls">
+      <button data-delta="-100">-100</button>
+      <button data-delta="-10">-10</button>
+      <input type="number" id="trials" min="1" value="1000">
+      <button data-delta="10">+10</button>
+      <button data-delta="100">+100</button>
     </div>
-    <table>
-      <thead>
-        <tr><th>아이템</th><th>확률%</th><th>기대</th><th>실제</th></tr>
-      </thead>
-      <tbody id="resultBody"></tbody>
-    </table>
+    <button id="runBtn">실행</button>
+    <div id="results"></div>
   </div>
-  <script>
-    const maxTries = 10000;
-    const input = document.getElementById('tries');
-    ['minus5','minus1','plus1','plus5'].forEach(id => {
-      document.getElementById(id).addEventListener('click', () => {
-        let v = parseInt(input.value) || 0;
-        const delta = id.startsWith('minus') ? -Number(id.slice(5)) : Number(id.slice(4));
-        v = Math.min(Math.max(v + delta, 1), maxTries);
-        input.value = v;
-        input.classList.toggle('blink', v === maxTries);
-      });
-    });
-    document.getElementById('reset').addEventListener('click', () => {
-      input.value = 100;
-      input.classList.remove('blink');
-    });
-    document.getElementById('run').addEventListener('click', runSimulation);
 
-    const itemTable = [
-      { name: '염원의 정기', rate: 0.0030 },
-      { name: '고결한 이지', rate: 0.0100 },
-      { name: '하르키니 주문서', rate: 0.0200 },
-      { name: '에아나드 잉크', rate: 0.0900 },
-      { name: '전설 장비상자', rate: 0.1000 },
-      { name: '영웅 무기 소환권', rate: 0.3000 },
-      { name: '전설 소환권', rate: 0.1000 },
-      { name: '전설 위상 파편', rate: 0.5500 },
-      { name: '영웅 위상 파편', rate: 3.0000 },
-      { name: '호라 마법부여석', rate: 1.0000 },
-      { name: '아스티 소환권', rate: 3.5000 },
-      { name: '찬란한 소환권×2', rate: 18.0000 },
-      { name: '희귀 잎새', rate: 4.5000 },
-      { name: '영웅 잎새', rate: 1.5000 },
-      { name: '별의 조각×10', rate: 8.5000 },
-      { name: '잔재×300', rate: 15.0000 },
-      { name: '기록 인장×5000', rate: 0.0050 },
-      { name: '기록 인장×300', rate: 0.5000 },
-      { name: '기록 인장×100', rate: 3.0000 },
-      { name: '기록 인장×50', rate: 13.0000 },
-      { name: '눈부신×100', rate: 0.0100 },
-      { name: '눈부신×5', rate: 1.0000 },
-      { name: '눈부신×1', rate: 26.3120 }
+  <script>
+    // 희소도 등급 매핑 함수
+    function getRarity(rate) {
+      if (rate <= 0.01) return { name: 'purple', rank: 6 };
+      if (rate <= 0.1)  return { name: 'gold',   rank: 5 };
+      if (rate <= 1)    return { name: 'yellow', rank: 4 };
+      if (rate <= 3)    return { name: 'blue',   rank: 3 };
+      if (rate <= 10)   return { name: 'green',  rank: 2 };
+      return { name: 'grey', rank: 1 };
+    }
+
+    // 확률표 정의
+    const items = [
+      { name: '염원의 정기 1개',     rate: 0.0030 },
+      { name: '고결한 이지의 방어구 선택 상자 1개', rate: 0.0100 },
+      { name: '하르키니의 강화 주문서 선택 상자 1개', rate: 0.0200 },
+      { name: '에아나드의 잉크 (전설) 1개', rate: 0.0900 },
+      { name: '전설 장비 선택 상자 1개', rate: 0.1000 },
+      { name: '영웅 무기 환영 소환권 (1회) (귀속) 1개', rate: 0.3000 },
+      { name: '전설 소환권 선택 상자 (귀속) 1개', rate: 0.1000 },
+      { name: '전설 위상의 파편 (귀속) 1개', rate: 0.5500 },
+      { name: '영웅 위상의 파편 (귀속) 1개', rate: 3.0000 },
+      { name: '호라의 마법부여석 선택 상자 (귀속) 1개', rate: 1.0000 },
+      { name: '아스티의 특별 소환권 (11회) 선택 상자 (귀속) 1개', rate: 3.5000 },
+      { name: '찬란한 소환권 (11회) 선택 상자 (귀속) 2개', rate: 18.0000 },
+      { name: '희귀 정원의 잎새 (귀속) 1개', rate: 4.5000 },
+      { name: '영웅 정원의 잎새 (귀속) 1개', rate: 1.5000 },
+      { name: '별의 조각 (귀속) 10개', rate: 8.5000 },
+      { name: '그릇된 자의 잔재 (귀속) 300개', rate: 15.0000 },
+      { name: '기록자의 인장 (귀속) 5,000개', rate: 0.0050 },
+      { name: '기록자의 인장 (귀속) 300개', rate: 0.5000 },
+      { name: '기록자의 인장 (귀속) 100개', rate: 3.0000 },
+      { name: '기록자의 인장 (귀속) 50개', rate: 13.0000 },
+      { name: '눈부신 무기 환영 소환권 (11회) (귀속) 100개', rate: 0.0100 },
+      { name: '눈부신 무기 환영 소환권 (11회) (귀속) 5개', rate: 1.0000 },
+      { name: '눈부신 무기 환영 소환권 (11회) (귀속) 1개', rate: 26.3120 }
     ];
 
-    function getColor(rate) {
-      if (rate <= 0.01) return '#c678dd';
-      if (rate <= 0.1) return '#ff9900';
-      if (rate <= 0.5) return '#fcd303';
-      if (rate <= 3) return '#ff5555';
-      if (rate <= 10) return '#55aaff';
-      if (rate <= 25) return '#aaaaaa';
-      return '#ffffff';
-    }
+    // 누적 확률 계산
+    let cum = 0;
+    const cumulative = items.map(item => {
+      cum += item.rate;
+      const rarity = getRarity(item.rate);
+      return { ...item, threshold: cum/100, rarity };
+    });
 
-    function runSimulation() {
-      const tries = Math.min(Math.max(parseInt(input.value) || 1, 1), maxTries);
-      const results = {};
-      itemTable.forEach(item => results[item.name] = 0);
-      for (let i = 0; i < tries; i++) {
-        let r = Math.random() * 100, cum = 0;
-        for (let item of itemTable) {
-          cum += item.rate;
-          if (r <= cum) {
-            results[item.name]++;
-            break;
-          }
+    // 수량 조절 버튼 이벤트
+    document.querySelectorAll('.controls button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const delta = parseInt(btn.getAttribute('data-delta'));
+        const input = document.getElementById('trials');
+        let val = Math.max(1, parseInt(input.value) + delta);
+        input.value = val;
+      });
+    });
+
+    document.getElementById('runBtn').addEventListener('click', () => {
+      const trials = parseInt(document.getElementById('trials').value, 10);
+      if (isNaN(trials) || trials <= 0) return;
+
+      // 카운트 초기화
+      const counts = cumulative.map(item => ({ ...item, count: 0 }));
+
+      // 시뮬
+      for (let i = 0; i < trials; i++) {
+        const r = Math.random();
+        for (let it of counts) {
+          if (r <= it.threshold) { it.count++; break; }
         }
       }
-      const frag = document.createDocumentFragment();
-      const sorted = [...itemTable].sort((a, b) => results[b.name] - results[a.name] || a.rate - b.rate);
-      sorted.forEach(item => {
-        const tr = document.createElement('tr');
-        const expected = ((item.rate / 100) * tries).toFixed(1);
-        const actual = results[item.name];
-        tr.innerHTML = `
-          <td style="color:${getColor(item.rate)}">${item.name}</td>
-          <td>${item.rate.toFixed(3)}</td>
-          <td>${expected}</td>
-          <td>${actual}</td>
-        `;
-        frag.appendChild(tr);
+
+      // 정렬: 등장 횟수 없는 아이템 하단, 그 외 희소도 순
+      counts.sort((a,b) => {
+        if ((a.count>0)!=(b.count>0)) return (b.count>0?1:0) - (a.count>0?1:0);
+        if (a.count>0) return b.rarity.rank - a.rarity.rank;
+        return a.rarity.rank - b.rarity.rank;
       });
-      const tbody = document.getElementById('resultBody');
-      tbody.innerHTML = '';
-      tbody.appendChild(frag);
-    }
+
+      // 테이블 출력
+      let html = '<table><thead><tr><th>아이템</th><th>개수</th><th>비율</th></tr></thead><tbody>';
+      counts.forEach(item => {
+        const ratio = ((item.count/trials)*100).toFixed(4) + '%';
+        html += `<tr><td class="rarity-${item.rarity.name}">${item.name}</td><td>${item.count}</td><td>${ratio}</td></tr>`;
+      });
+      html += '</tbody></table>';
+      document.getElementById('results').innerHTML = html;
+    });
   </script>
 </body>
 </html>
