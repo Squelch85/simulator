@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>선물 상자 시뮬레이터 대시보드</title>
+  <style>
+    :root {
+      --bg-color: #f4f4f4;
+      --text-color: #000000;
+      --container-bg: #ffffff;
+      --border-color: #dddddd;
+      --control-bg: #eeeeee;
+      --control-hover: #dddddd;
+      --th-bg: #f2f2f2;
+      --shadow: rgba(0,0,0,0.1);
+    }
+    html.dark {
+      --bg-color: #121212;
+      --text-color: #e0e0e0;
+      --container-bg: #1e1e1e;
+      --border-color: #333333;
+      --control-bg: #2c2c2c;
+      --control-hover: #3a3a3a;
+      --th-bg: #2c2c2c;
+      --shadow: rgba(0,0,0,0.5);
+    }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; background-color: var(--bg-color); color: var(--text-color); transition: background-color .3s, color .3s; }
+    .container { width: 100%; max-width: 600px; margin: 20px; padding: 15px; background: var(--container-bg); border-radius: 8px; box-shadow: 0 2px 8px var(--shadow); transition: background .3s; }
+    h1 { text-align: center; font-size: 1.5rem; margin-bottom: 0.75rem; font-weight: bold; }
+    .theme-toggle { position: absolute; top: 10px; right: 10px; }
+    .theme-btn { background: none; border: none; font-size: 1.5rem; filter: grayscale(100%); cursor: pointer; transition: filter .3s; color: var(--text-color); }
+    .theme-btn:hover { filter: grayscale(0%); }
+    .controls { display: flex; gap: 4px; align-items: center; margin-bottom: 0.75rem; }
+    .controls button { flex: 1; padding: 0.25rem; font-size: 0.9rem; font-weight: bold; border: 1px solid var(--border-color); border-radius: 4px; background: var(--control-bg); color: var(--text-color); cursor: pointer; transition: background .3s; }
+    .controls button:hover { background: var(--control-hover); }
+    .controls input { width: 80px; padding: 0.25rem; font-size: 0.9rem; text-align: center; border: 1px solid var(--border-color); border-radius: 4px; background: var(--container-bg); color: var(--text-color); }
+    #runBtn { width: 100%; padding: 0.5rem; font-size: 1rem; background-color: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 0.5rem; }
+    #runBtn:hover { background-color: #0056b3; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--border-color); padding: 0.25rem; text-align: center; font-weight: bold; font-size: 0.85rem; line-height: 1.2; }
+    th { background-color: var(--th-bg); }
+    .color-red    { color: #FF0000; }
+    .color-yellow { color: #CCCC00; }
+    .color-blue   { color: #0000FF; }
+    .color-grey   { color: #808080; }
+    @keyframes textBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .blink { animation: textBlink 1s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+  <div class="theme-toggle">
+    <button id="toggleTheme" class="theme-btn">🌙</button>
+  </div>
+  <div class="container">
+    <a href="index.html">&larr; 홈으로</a>
+    <h1>선물 상자 시뮬레이터 대시보드</h1>
+    <div class="controls">
+      <button data-delta="-100">-100</button>
+      <button data-delta="-10">-10</button>
+      <input type="number" id="trials" min="1" value="100">
+      <button data-delta="10">+10</button>
+      <button data-delta="100">+100</button>
+    </div>
+    <button id="runBtn">실행</button>
+    <div id="results"></div>
+  </div>
+  <script>
+    const toggleBtn = document.getElementById('toggleTheme');
+    toggleBtn.addEventListener('click', () => document.documentElement.classList.toggle('dark'));
+    const items = [
+      { name: '염원 정기', rate: 0.0030 },
+      { name: '고결 방어구상자', rate: 0.0100 },
+      { name: '강화 주문서상자', rate: 0.0200 },
+      { name: '잉크(전설)', rate: 0.0900 },
+      { name: '전설 장비상자', rate: 0.1000 },
+      { name: '영웅 무기소환권', rate: 0.3000 },
+      { name: '전설 소환권상자', rate: 0.1000 },
+      { name: '전설 파편', rate: 0.5500 },
+      { name: '영웅 파편', rate: 3.0000 },
+      { name: '마법부여석상자', rate: 1.0000 },
+      { name: '아스티 특별소환권상자', rate: 3.5000 },
+      { name: '찬란 소환권×2', rate: 18.0000 },
+      { name: '희귀 잎새', rate: 4.5000 },
+      { name: '영웅 잎새', rate: 1.5000 },
+      { name: '별 조각×10', rate: 8.5000 },
+      { name: '잔재×300', rate: 15.0000 },
+      { name: '인장×5000', rate: 0.0050 },
+      { name: '인장×300', rate: 0.5000 },
+      { name: '인장×100', rate: 3.0000 },
+      { name: '인장×50', rate: 13.0000 },
+      { name: '무기권×100', rate: 0.0100 },
+      { name: '무기권×5', rate: 1.0000 },
+      { name: '무기권×1', rate: 26.3120 }
+    ];
+    const colorMap = {
+      '전설 소환권상자':'yellow','전설 파편':'yellow','염원 정기':'yellow','고결 방어구상자':'yellow','잉크(전설)':'yellow','전설 장비상자':'yellow',
+      '영웅 무기소환권':'red','인장×300':'red','무기권×5':'red','영웅 파편':'red','영웅 잎새':'red','인장×100':'red','아스티 특별소환권상자':'red','별 조각×10':'red','찬란 소환권×2':'red','인장×50':'red','무기권×1':'red','인장×5000':'red','무기권×100':'red',
+      '희귀 잎새':'blue','마법부여석상자':'grey','잔재×300':'grey','강화 주문서상자':'grey'
+    };
+    function getRarity(rate) { if (rate <= 0.01) return 6; if (rate <= 0.1) return 5; if (rate <= 1) return 4; if (rate <= 3) return 3; if (rate <= 10) return 2; return 1; }
+    let cum = 0;
+    const cumulative = items.map(item => ({ ...item, threshold: (cum += item.rate) / 100, rank: getRarity(item.rate) }));
+    document.querySelectorAll('.controls button').forEach(btn => btn.addEventListener('click', () => {
+      const inp = document.getElementById('trials');
+      inp.value = Math.max(1, parseInt(inp.value) + parseInt(btn.getAttribute('data-delta')));
+    }));
+    document.getElementById('runBtn').addEventListener('click', () => {
+      const trials = parseInt(document.getElementById('trials').value, 10);
+      if (trials <= 0) return;
+      const counts = cumulative.map(i => ({ ...i, count: 0 }));
+      for (let i = 0; i < trials; i++) {
+        const r = Math.random();
+        for (let it of counts) if (r <= it.threshold) { it.count++; break; }
+      }
+      counts.sort((a, b) => ((b.count > 0) - (a.count > 0)) || (b.rank - a.rank));
+      const blinkNames = ['염원 정기','고결 방어구상자','잉크(전설)','전설 장비상자'];
+      let html = '<table><thead><tr><th>아이템</th><th>기대수</th><th>획득수</th></tr></thead><tbody>';
+      counts.forEach(it => {
+        const exp = (it.rate / 100 * trials).toFixed(2);
+        const cls = colorMap[it.name] || 'grey';
+        const blink = (blinkNames.includes(it.name) && it.count > 0) ? ' blink' : '';
+        html += `<tr>
+          <td><span class="color-${cls}${blink}">${it.name}</span></td>
+          <td><span class="color-${cls}${blink}">${exp}</span></td>
+          <td><span class="color-${cls}${blink}">${it.count}</span></td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+      document.getElementById('results').innerHTML = html;
+    });
+  </script>
+</body>
+</html>
