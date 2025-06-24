@@ -19,16 +19,24 @@
       text-align: center;
     }
     .title {
-      font-size: 2.5rem;
+      font-size: 3rem;
       color: #ffd700;
       margin: 0 0 1rem;
-      animation: dropDown 1.5s ease-out forwards;
-      transform: translateY(-200%);
+      opacity: 0;
+    }
+    .title.show {
+      animation: fadeIn 1s forwards;
     }
     @keyframes dropDown {
       to { transform: translateY(0); }
     }
-    #titleCanvas { display:block; margin:0 auto 1rem; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    #titleCanvas {
+      display:block;
+      margin:0 auto 1rem;
+      transform: translateY(-200%);
+      animation: dropDown 1s ease-out forwards;
+    }
     ul.menu { list-style: none; padding: 0; margin: 0; }
     .menu li { margin-top: 1rem; }
     .menu a {
@@ -58,16 +66,17 @@
       const canvas = document.getElementById('titleCanvas');
       const ctx = canvas.getContext('2d');
       const text = '아키워 헬퍼';
-      ctx.font = 'bold 60px monospace';
+      const fontSize = 100;
+      ctx.font = `bold ${fontSize}px monospace`;
       const metrics = ctx.measureText(text);
       canvas.width = metrics.width + 20;
-      canvas.height = 80;
-      const baseline = 60;
-      ctx.font = 'bold 60px monospace';
+      canvas.height = fontSize + 20;
+      const baseline = fontSize;
+      ctx.font = `bold ${fontSize}px monospace`;
       ctx.fillStyle = '#ffd700';
       ctx.fillText(text, 10, baseline);
       const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const step = 6;
+      const step = 8;
       let dots = [];
       for (let y = 0; y < canvas.height; y += step) {
         for (let x = 0; x < canvas.width; x += step) {
@@ -84,7 +93,10 @@
       drawDots();
       let pacX = -20;
       const pacY = canvas.height / 2;
-      const pacRadius = 10;
+      const pacRadius = 15;
+      const monsterX = canvas.width * 0.75;
+      const monsterRadius = pacRadius + 5;
+      let gameOver = false;
       let mouth = 0;
       function drawPacman() {
         const angle = 0.25 + Math.abs(Math.sin(mouth)) * 0.25;
@@ -94,6 +106,12 @@
         ctx.lineTo(pacX, pacY);
         ctx.fill();
         mouth += 0.2;
+      }
+      function drawMonster() {
+        ctx.fillStyle = 'red';
+        ctx.beginPath();
+        ctx.arc(monsterX, pacY, monsterRadius, 0, Math.PI * 2);
+        ctx.fill();
       }
       function animate() {
         ctx.fillStyle = '#000';
@@ -109,6 +127,15 @@
           return true;
         });
         drawPacman();
+        drawMonster();
+        if (!gameOver && Math.abs(pacX - monsterX) < pacRadius + monsterRadius) {
+          gameOver = true;
+          ctx.font = 'bold 40px monospace';
+          ctx.fillStyle = 'red';
+          ctx.textAlign = 'center';
+          ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2);
+          return setTimeout(finish, 1000);
+        }
         pacX += 2;
         if (pacX - pacRadius > canvas.width) {
           if (dots.length === 0) return finish();
@@ -122,10 +149,11 @@
           canvas.style.display = 'none';
           const title = document.querySelector('h1.title');
           title.style.display = 'block';
+          title.classList.add('show');
         }, 1000);
       }
       document.querySelector('h1.title').style.display = 'none';
-      animate();
+      setTimeout(animate, 1000);
     });
   </script>
 </body>
