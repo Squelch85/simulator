@@ -12,8 +12,11 @@
     .item-header { display:flex; justify-content:space-between; align-items:center; }
     .item-header .info { flex:1; }
     .item-header .info div { margin-bottom:4px; }
+    .item-header .info div:first-child { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .controls { display:flex; flex-wrap:wrap; gap:4px; justify-content:flex-end; }
-    .controls button { flex:1 1 20%; padding:6px; background:#333; border:1px solid #555; border-radius:4px; color:#eee; font-weight:bold; cursor:pointer; }
+    .item-card .controls { display:grid; grid-template-columns:repeat(3,1fr); }
+    .controls button { padding:6px; background:#333; border:1px solid #555; border-radius:4px; color:#eee; font-weight:bold; cursor:pointer; }
+    .item-card .controls button { width:100%; }
     .controls button:hover { background:#444; }
     input[type=number] { width:60px; padding:4px; background:#2a2a2a; border:1px solid #555; border-radius:4px; color:#fff; text-align:center; }
     .total { text-align:center; font-weight:bold; font-size:1.2em; margin:16px 0; }
@@ -56,19 +59,19 @@
 const defaultMax = 2000;
 let MAX_TOTAL = defaultMax;
 const items = [
-  ["눈부신 무기 환영 소환권 (11회)",15,20,"눈부신 무기를 소환"],
-  ["찬란한 소환권 (11회) 선택 상자",20,20,"찬란한 소환권을 얻습니다"],
-  ["호라의 마법부여석 선택 상자",20,5,"마법부여석을 선택"],
-  ["11회 소환권 선택 상자",5,50,"다양한 소환권을 선택"],
-  ["페르디타의 가면 상자 (11개)",20,30,"페르디타 가면 획득"],
-  ["고결한 은둔자의 팔찌 상자 (11개)",10,30,"은둔자 팔찌"],
-  ["에아나드 마법사의 귀걸이 상자 (11개)",10,30,"마법사 귀걸이"],
-  ["소원을 잊지 않는 자의 팔찌 상자 (11개)",10,30,"소원을 잊지 않는 자"],
-  ["위대한 개척자의 귀걸이 상자 (11개)",10,30,"위대한 개척자 귀걸이"],
-  ["영웅 위상의 파편 1개",40,5,"영웅 위상 파편"],
-  ["아키움 결정 10,000개",20,5,"아키움 결정"],
-  ["종자의 보물 상자 (일반) 1개",5,50,"종자의 보물"],
-  ["축복받은 마법부여석 묶음 상자",1,30,"마법부여석 묶음"],
+  ["눈부신 무기 환영소환권(11회)",15,20,"눈부신 무기를 소환"],
+  ["찬란 소환권(11회) 선택",20,20,"찬란한 소환권을 얻습니다"],
+  ["호라 마법부여석 상자",20,5,"마법부여석을 선택"],
+  ["11회 소환권 선택",5,50,"다양한 소환권을 선택"],
+  ["페르디타 가면상자(11개)",20,30,"페르디타 가면 획득"],
+  ["고결한 은둔자 팔찌(11개)",10,30,"은둔자 팔찌"],
+  ["에아나드 귀걸이(11개)",10,30,"마법사 귀걸이"],
+  ["소원을 잊지 않는 팔찌(11개)",10,30,"소원을 잊지 않는 자"],
+  ["위대한 개척자 귀걸이(11개)",10,30,"위대한 개척자 귀걸이"],
+  ["영웅 위상 파편",40,5,"영웅 위상 파편"],
+  ["아키움 결정 1만개",20,5,"아키움 결정"],
+  ["종자의 보물상자(일반)",5,50,"종자의 보물"],
+  ["축복 마법부여석 묶음",1,30,"마법부여석 묶음"],
 ];
 const cardContainer=document.getElementById('card-view');
 const deskBody=document.querySelector('#desk-table tbody');
