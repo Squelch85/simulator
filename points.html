@@ -29,17 +29,17 @@
     body { margin:0; padding:16px; font-family:sans-serif; background:var(--bg-color); color:var(--text-color); }
     h2 { text-align:center; margin-bottom:16px; font-weight:bold; }
     button, input { font-family:inherit; font-size:1em; }
-    .item-card { background:var(--container-bg); border:1px solid var(--border-color); border-radius:8px; padding:12px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px; }
+    .item-card { background:var(--container-bg); border:1px solid var(--border-color); border-radius:8px; padding:8px; margin-bottom:8px; display:flex; flex-direction:column; gap:6px; font-size:0.9em; }
     .item-header { display:flex; justify-content:space-between; align-items:center; }
     .item-header .info { flex:1; }
     .item-header .info div { margin-bottom:4px; }
     .item-header .info div:first-child { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .controls { display:flex; flex-wrap:wrap; gap:4px; justify-content:flex-end; }
-    .item-card .controls { display:grid; grid-template-columns:repeat(3,1fr); }
-    .controls button { padding:6px; background:var(--control-bg); border:1px solid var(--border-color); border-radius:4px; color:var(--text-color); font-weight:bold; cursor:pointer; }
+    .item-card .controls { display:grid; grid-template-columns:repeat(5,1fr); gap:4px; }
+    .controls button { padding:4px; background:var(--control-bg); border:1px solid var(--border-color); border-radius:4px; color:var(--text-color); font-weight:bold; cursor:pointer; }
     .item-card .controls button { width:100%; }
     .controls button:hover { background:var(--control-hover); }
-    input[type=number] { width:60px; padding:4px; background:var(--container-bg); border:1px solid var(--border-color); border-radius:4px; color:var(--text-color); text-align:center; }
+    input[type=number] { width:50px; padding:4px; background:var(--container-bg); border:1px solid var(--border-color); border-radius:4px; color:var(--text-color); text-align:center; }
     .total { text-align:center; font-weight:bold; font-size:1.2em; margin:16px 0; }
     .maxed-text { animation: flash-color 1s steps(20) infinite; }
     @keyframes flash-color { 0%,50% { color:#ff1744; } 25%,75% { color:#b71c1c; } }
@@ -51,7 +51,15 @@
     .theme-toggle { position:fixed; top:8px; right:8px; }
     .theme-toggle button { background:none; border:none; font-size:1.5rem; color:var(--text-color); cursor:pointer; }
     .home-link { position:fixed; top:8px; left:8px; color:var(--text-color); text-decoration:none; font-weight:bold; }
-    @media (min-width:768px){ .item-card { display:none; } table { width:100%; border-collapse:collapse; } th,td{ border:1px solid #333; padding:8px; text-align:center; } input[type=number]{ width:60px; } .controls{ flex-wrap:nowrap; } }
+    .table-wrapper{ display:none; }
+    @media (min-width:768px){
+      .item-card { display:none; }
+      .table-wrapper{ display:block; }
+      table { width:100%; border-collapse:collapse; }
+      th,td{ border:1px solid #333; padding:8px; text-align:center; }
+      input[type=number]{ width:60px; }
+      .controls{ flex-wrap:nowrap; }
+    }
   </style>
 </head>
 <body>
@@ -62,8 +70,6 @@
     <input type="text" id="search" class="search" placeholder="아이템 검색...">
     최대 포인트 <input type="number" id="max-total" value="2000" min="1" inputmode="numeric">
     <span id="remain">잔여: 2000</span>
-    <button id="save">저장</button>
-    <button id="load">불러오기</button>
   </div>
   <div id="calculator">
     <div id="card-view"></div>
@@ -174,28 +180,11 @@ function resetAll(){
   updateTotal();
 }
 
-function saveData(){
-  const data={max:MAX_TOTAL, qty:items.map((_,idx)=>document.getElementById(`card-qty-${idx}`).value)};
-  localStorage.setItem('pointsave',JSON.stringify(data));
-}
-function loadData(){
-  const data=JSON.parse(localStorage.getItem('pointsave')||'null');
-  if(!data) return;
-  document.getElementById('max-total').value=data.max;
-  MAX_TOTAL=data.max;
-  data.qty.forEach((v,idx)=>{
-    ['card','desk'].forEach(pref=>document.getElementById(`${pref}-qty-${idx}`).value=v);
-  });
-  updateTotal();
-}
 
 function toggleTheme(){
   document.documentElement.classList.toggle('dark');
 }
 
-document.getElementById('save').addEventListener('click',()=>{ saveData(); });
-
-document.getElementById('load').addEventListener('click',()=>{ loadData(); });
 
 document.getElementById('themeBtn').addEventListener('click',toggleTheme);
 
