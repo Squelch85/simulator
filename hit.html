@@ -1,16 +1,33 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="dark">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🎯 명중률 계산기 (슬라이더형)</title>
   <style>
+    :root {
+      --bg-color: #f4f4f4;
+      --text-color: #000000;
+      --container-bg: #ffffff;
+      --border-color: #dddddd;
+    }
+    html.dark {
+      --bg-color: #121212;
+      --text-color: #e0e0e0;
+      --container-bg: #1e1e1e;
+      --border-color: #333333;
+    }
     body {
-      background-color: #1e1e1e;
-      color: #ffffff;
+      background: var(--bg-color);
+      color: var(--text-color);
       font-family: sans-serif;
       text-align: center;
       padding: 2em;
+      transition: background-color .3s, color .3s;
     }
+    .theme-toggle { position: fixed; top: 8px; right: 8px; }
+    .theme-toggle button { background: none; border: none; font-size: 1.5rem; color: var(--text-color); cursor: pointer; }
+    .home-link { position: fixed; top: 8px; left: 8px; color: var(--text-color); text-decoration: none; font-weight: bold; }
     .slider-group {
       margin: 1em 0;
     }
@@ -44,6 +61,8 @@
   </style>
 </head>
 <body>
+  <div class="theme-toggle"><button id="themeBtn">🌙</button></div>
+  <a href="index.html" class="home-link">&larr; 홈으로</a>
   <h1>🎯 명중률 계산기</h1>
 
   <div class="slider-group">
@@ -97,6 +116,12 @@
       document.getElementById('output').innerText =
         `실질 차이: ${effectiveDiff} → 예상 명중률: ${hitRate.toFixed(2)}%`;
     }
+
+    function toggleTheme(){
+      document.documentElement.classList.toggle('dark');
+    }
+
+    document.getElementById('themeBtn').addEventListener('click', toggleTheme);
 
     window.onload = update;
   </script>
