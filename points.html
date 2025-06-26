@@ -5,20 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>바르아 포인트계산기</title>
   <style>
-    body { margin:0; padding:16px; font-family:sans-serif; background:#121212; color:#e0e0e0; }
+    :root {
+      --bg-color: #f4f4f4;
+      --text-color: #000000;
+      --container-bg: #ffffff;
+      --border-color: #dddddd;
+      --control-bg: #eeeeee;
+      --control-hover: #dddddd;
+      --shadow: rgba(0,0,0,0.1);
+    }
+    html.dark {
+      --bg-color: #121212;
+      --text-color: #e0e0e0;
+      --container-bg: #1e1e1e;
+      --border-color: #333333;
+      --control-bg: #2c2c2c;
+      --control-hover: #3a3a3a;
+      --shadow: rgba(0,0,0,0.5);
+    }
+    body { margin:0; padding:16px; font-family:sans-serif; background:var(--bg-color); color:var(--text-color); }
     h2 { text-align:center; margin-bottom:16px; font-weight:bold; }
     button, input { font-family:inherit; font-size:1em; }
-    .item-card { background:#1e1e1e; border:1px solid #333; border-radius:8px; padding:12px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px; }
+    .item-card { background:var(--container-bg); border:1px solid var(--border-color); border-radius:8px; padding:12px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px; }
     .item-header { display:flex; justify-content:space-between; align-items:center; }
     .item-header .info { flex:1; }
     .item-header .info div { margin-bottom:4px; }
     .item-header .info div:first-child { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .controls { display:flex; flex-wrap:wrap; gap:4px; justify-content:flex-end; }
     .item-card .controls { display:grid; grid-template-columns:repeat(3,1fr); }
-    .controls button { padding:6px; background:#333; border:1px solid #555; border-radius:4px; color:#eee; font-weight:bold; cursor:pointer; }
+    .controls button { padding:6px; background:var(--control-bg); border:1px solid var(--border-color); border-radius:4px; color:var(--text-color); font-weight:bold; cursor:pointer; }
     .item-card .controls button { width:100%; }
-    .controls button:hover { background:#444; }
-    input[type=number] { width:60px; padding:4px; background:#2a2a2a; border:1px solid #555; border-radius:4px; color:#fff; text-align:center; }
+    .controls button:hover { background:var(--control-hover); }
+    input[type=number] { width:60px; padding:4px; background:var(--container-bg); border:1px solid var(--border-color); border-radius:4px; color:var(--text-color); text-align:center; }
     .total { text-align:center; font-weight:bold; font-size:1.2em; margin:16px 0; }
     .maxed-text { animation: flash-color 1s steps(20) infinite; }
     @keyframes flash-color { 0%,50% { color:#ff1744; } 25%,75% { color:#b71c1c; } }
@@ -26,16 +44,10 @@
     .reset-button:hover { background:#e53935; }
     .top-controls { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:8px; }
     .top-controls input { flex:1; min-width:120px; }
-    .search { padding:6px; background:#2a2a2a; border:1px solid #555; border-radius:4px; color:#fff; }
+    .search { padding:6px; background:var(--container-bg); border:1px solid var(--border-color); border-radius:4px; color:var(--text-color); }
     .theme-toggle { position:fixed; top:8px; right:8px; }
-    .theme-toggle button { background:none; border:none; font-size:1.5rem; color:#e0e0e0; cursor:pointer; }
-    .home-link { position:fixed; top:8px; left:8px; color:#e0e0e0; text-decoration:none; font-weight:bold; }
-    html.light body { background:#ffffff; color:#000000; }
-    html.light .home-link { color:#000000; }
-    html.light .item-card { background:#f5f5f5; border-color:#ccc; }
-    html.light .controls button { background:#ddd; border-color:#bbb; color:#000; }
-    html.light .controls button:hover { background:#ccc; }
-    html.light input[type=number], html.light .search { background:#fff; color:#000; border-color:#bbb; }
+    .theme-toggle button { background:none; border:none; font-size:1.5rem; color:var(--text-color); cursor:pointer; }
+    .home-link { position:fixed; top:8px; left:8px; color:var(--text-color); text-decoration:none; font-weight:bold; }
     @media (min-width:768px){ .item-card { display:none; } table { width:100%; border-collapse:collapse; } th,td{ border:1px solid #333; padding:8px; text-align:center; } input[type=number]{ width:60px; } .controls{ flex-wrap:nowrap; } }
   </style>
 </head>
@@ -175,7 +187,7 @@ function loadData(){
 }
 
 function toggleTheme(){
-  document.documentElement.classList.toggle('light');
+  document.documentElement.classList.toggle('dark');
 }
 
 document.getElementById('save').addEventListener('click',()=>{ saveData(); });
