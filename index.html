@@ -101,7 +101,7 @@
       ctx.fillStyle = '#ffd700';
       ctx.fillText(text, 10, baseline);
       const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const step = 8;
+      const step = 4;
       let dots = [];
       for (let y = 0; y < canvas.height; y += step) {
         for (let x = 0; x < canvas.width; x += step) {
@@ -117,11 +117,15 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawDots();
       let pacX = -20;
-      const pacY = canvas.height / 2;
+      let pacY = canvas.height / 2;
+      const startX = pacX;
+      const startY = pacY;
       const pacRadius = 15;
       const monsterX = canvas.width * 0.75;
       const monsterRadius = pacRadius + 5;
-      let gameOver = false;
+      const duration = 4000;
+      const amplitude = canvas.height / 4;
+      let startTime;
       let mouth = 0;
       function drawPacman() {
         const angle = 0.25 + Math.abs(Math.sin(mouth)) * 0.25;
@@ -135,10 +139,14 @@
       function drawMonster() {
         ctx.fillStyle = 'red';
         ctx.beginPath();
-        ctx.arc(monsterX, pacY, monsterRadius, 0, Math.PI * 2);
+        ctx.arc(monsterX, startY, monsterRadius, 0, Math.PI * 2);
         ctx.fill();
       }
-      function animate() {
+      function animate(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const t = Math.min((timestamp - startTime) / duration, 1);
+        pacX = startX + (monsterX - startX) * t;
+        pacY = startY + amplitude * Math.sin(t * Math.PI * 4);
         ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--bg-color') || '#000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         dots = dots.filter(d => {
@@ -153,18 +161,7 @@
         });
         drawPacman();
         drawMonster();
-        if (!gameOver && Math.abs(pacX - monsterX) < pacRadius + monsterRadius) {
-          gameOver = true;
-          ctx.font = 'bold 40px monospace';
-          ctx.fillStyle = 'red';
-          ctx.textAlign = 'center';
-          ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2);
-          return setTimeout(finish, 1000);
-        }
-        pacX += 2;
-        if (pacX - pacRadius > canvas.width) {
-          if (dots.length === 0) return finish();
-        }
+        if (t >= 1) return setTimeout(finish, 500);
         requestAnimationFrame(animate);
       }
       function finish() {
