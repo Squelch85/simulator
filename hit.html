@@ -2,97 +2,103 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>명중률 계산기</title>
+  <title>🎯 명중률 계산기 (슬라이더형)</title>
   <style>
-    :root {
-      --bg-color: #f4f4f4;
-      --text-color: #000000;
-      --container-bg: #ffffff;
-      --border-color: #dddddd;
-      --control-bg: #eeeeee;
-      --control-hover: #dddddd;
-      --shadow: rgba(0,0,0,0.1);
-    }
-    html.dark {
-      --bg-color: #121212;
-      --text-color: #e0e0e0;
-      --container-bg: #1e1e1e;
-      --border-color: #333333;
-      --control-bg: #2c2c2c;
-      --control-hover: #3a3a3a;
-      --shadow: rgba(0,0,0,0.5);
-    }
     body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      transition: background-color 0.3s, color 0.3s;
+      background-color: #1e1e1e;
+      color: #ffffff;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2em;
     }
-    .container {
-      max-width: 480px;
-      margin: 0 auto;
-      background: var(--container-bg);
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px var(--shadow);
-      transition: background 0.3s;
+    .slider-group {
+      margin: 1em 0;
     }
-    input[type=number] {
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 8px;
-      background: var(--container-bg);
-      color: var(--text-color);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
+    input[type=range] {
+      width: 300px;
     }
-    button {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
+    .label {
+      margin-top: 0.5em;
       font-weight: bold;
     }
-    button:hover { background-color: #0056b3; }
-    .theme-toggle { position: absolute; top: 10px; right: 10px; }
-    .theme-btn {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      color: var(--text-color);
-      cursor: pointer;
+    .value {
+      font-size: 1.1em;
+      color: #00ffff;
+    }
+    .result {
+      font-size: 1.5em;
+      margin-top: 1.5em;
+      color: #00ff88;
+    }
+    .desc {
+      font-size: 0.9em;
+      color: #bbbbbb;
+      margin-top: 1.5em;
+    }
+    .note {
+      font-size: 0.85em;
+      color: #999999;
+      margin-top: 2em;
+      line-height: 1.6em;
     }
   </style>
 </head>
 <body>
-  <div class="theme-toggle"><button id="toggleTheme" class="theme-btn">🌙</button></div>
-  <div class="container">
-    <a href="index.html">&larr; 홈으로</a>
-    <h1>명중률 계산기</h1>
-    <label for="hit">공격자 명중</label>
-    <input type="number" id="hit" value="100" min="0">
-    <label for="dodge">방어자 회피</label>
-    <input type="number" id="dodge" value="100" min="0">
-    <button id="calcBtn">계산</button>
-    <div id="result"></div>
+  <h1>🎯 명중률 계산기</h1>
+
+  <div class="slider-group">
+    <div class="label">🟦 공격자 명중 합계: <span id="atk_val" class="value">500</span></div>
+    <input type="range" id="atk" min="0" max="1000" value="500" oninput="update()">
   </div>
-<script>
-  document.getElementById('toggleTheme').addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-  });
-  document.getElementById('calcBtn').addEventListener('click', () => {
-    const hit = parseFloat(document.getElementById('hit').value) || 0;
-    const dodge = parseFloat(document.getElementById('dodge').value) || 0;
-    const rate = hit + dodge === 0 ? 0 : hit / (hit + dodge) * 100;
-    document.getElementById('result').textContent = `명중률: ${rate.toFixed(2)}%`;
-  });
-</script>
+
+  <div class="slider-group">
+    <div class="label">🟥 피격자 방어 합계: <span id="def_val" class="value">500</span></div>
+    <input type="range" id="def" min="0" max="1000" value="500" oninput="update()">
+  </div>
+
+  <div class="slider-group">
+    <div class="label">🟨 기초 회피력 (보정 상수): <span id="eva_val" class="value">15</span></div>
+    <input type="range" id="eva" min="0" max="100" value="15" oninput="update()">
+  </div>
+
+  <div class="result" id="output"></div>
+
+  <div class="desc">
+    수식: 100 / (1 + e<sup>-0.065 × (A - D - E)</sup>)
+  </div>
+
+  <div class="note">
+    ※ 본 계산기는 <strong>스트리머 박쥐형</strong>이 수집한 실제 데이터를 기반으로 추정된 명중률 모델을 사용합니다.<br>
+    입력된 수치는 <strong>명중 합계</strong>와 <strong>방어 합계</strong>만을 고려하며,<br>
+    게임 내 회피력, 레벨 보정, 상태 이상 등 <strong>추가 보정 요소는 반영되지 않습니다.</strong><br>
+    <strong>기초 회피력 슬라이더</strong>를 조정하여, 상황에 맞는 명중률을 참고용으로 확인해주세요.
+  </div>
+
+  <script>
+    function calculateHitRate(atk, def, eva, k = 0.065) {
+      const diff = atk - def - eva;
+      const rate = 100 / (1 + Math.exp(-k * diff));
+      return Math.max(0, Math.min(100, rate));
+    }
+
+    function update() {
+      const atk = parseInt(document.getElementById('atk').value);
+      const def = parseInt(document.getElementById('def').value);
+      const eva = parseInt(document.getElementById('eva').value);
+
+      document.getElementById('atk_val').innerText = atk;
+      document.getElementById('def_val').innerText = def;
+      document.getElementById('eva_val').innerText = eva;
+
+      const hitRate = calculateHitRate(atk, def, eva);
+      const diff = atk - def;
+      const effectiveDiff = diff - eva;
+
+      document.getElementById('output').innerText =
+        `실질 차이: ${effectiveDiff} → 예상 명중률: ${hitRate.toFixed(2)}%`;
+    }
+
+    window.onload = update;
+  </script>
 </body>
 </html>
