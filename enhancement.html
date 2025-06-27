@@ -109,6 +109,9 @@
     .run-controls { display: flex; gap: 4px; justify-content: center; margin-bottom: 8px; }
     .run-controls button { flex:1; padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 1rem; }
     .run-controls button:hover { background: var(--control-hover); }
+    .select-controls { display: flex; gap: 4px; justify-content: center; margin-bottom: 8px; }
+    .select-controls button { flex:1; padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 1rem; }
+    .select-controls button:hover { background: var(--control-hover); }
     @keyframes successFlash { from { background: green; } to { background: inherit; } }
     @keyframes failFlash { from { background: red; } to { background: inherit; } }
   </style>
@@ -132,12 +135,17 @@
     <button onclick="enhanceOnce(true)">축복</button>
     <button onclick="enhanceAllSteps()">다중강화</button>
   </div>
+  <div class="select-controls">
+    <button onclick="selectSameLevel()">동일등급선택</button>
+    <button onclick="deselectAll()">선택해제</button>
+  </div>
 
   <script src="enhance_rates.js" defer></script>
   <script>
     const entries = [];
     let entryGrid;
     let selectedTarget = 1;
+    let lastSelectedId = null;
 
     function populateControls() {
       const regControls = document.getElementById('reg-controls');
@@ -224,7 +232,14 @@
 
     function toggleSelect(id) {
       const item = entries.find(it => it.id === id);
-      if (item) item.selected = !item.selected;
+      if (item) {
+        item.selected = !item.selected;
+        if (item.selected) {
+          lastSelectedId = id;
+        } else if (lastSelectedId === id) {
+          lastSelectedId = null;
+        }
+      }
       renderEntries();
       updateStepBar();
     }
@@ -290,6 +305,23 @@
     function decreaseAll() {
       selectedEntries().forEach(it => {
         if (it.level > 0) it.level--;
+      });
+      renderEntries();
+      updateStepBar();
+    }
+
+    function deselectAll() {
+      entries.forEach(it => it.selected = false);
+      lastSelectedId = null;
+      renderEntries();
+      updateStepBar();
+    }
+
+    function selectSameLevel() {
+      const base = entries.find(it => it.id === lastSelectedId && it.selected);
+      if (!base) return;
+      entries.forEach(it => {
+        if (it.level === base.level) it.selected = true;
       });
       renderEntries();
       updateStepBar();
