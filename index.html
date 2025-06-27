@@ -16,6 +16,8 @@
       --control-bg: #eeeeee;
       --control-hover: #dddddd;
       --shadow: rgba(0,0,0,0.1);
+      --pac-color: #ffff00;
+      --ghost-color: #ff4444;
     }
     html.dark {
       --bg-color: #121212;
@@ -25,6 +27,8 @@
       --control-bg: #2c2c2c;
       --control-hover: #3a3a3a;
       --shadow: rgba(0,0,0,0.5);
+      --pac-color: #ffff00;
+      --ghost-color: #ff4444;
     }
     body {
       font-family: "Courier New", monospace;
@@ -53,7 +57,9 @@
     }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     #titleCanvas {
-  max-width: 90vw; height: auto;
+      width: 100%;
+      max-width: 90vw;
+      height: auto;
       display:block;
       margin:0 auto 1rem;
       transform: translateY(-200%);
@@ -92,14 +98,20 @@
       const canvas = document.getElementById('titleCanvas');
       const ctx = canvas.getContext('2d');
       const text = '아키워 헬퍼';
-      const fontSize = Math.min(100, window.innerWidth * 0.15);
+      let fontSize = 100;
       ctx.font = `bold ${fontSize}px monospace`;
-      const metrics = ctx.measureText(text);
+      let metrics = ctx.measureText(text);
+      while (metrics.width + 20 > window.innerWidth * 0.9 && fontSize > 20) {
+        fontSize -= 2;
+        ctx.font = `bold ${fontSize}px monospace`;
+        metrics = ctx.measureText(text);
+      }
       canvas.width = metrics.width + 20;
       canvas.height = fontSize + 20;
+      canvas.style.width = Math.min(canvas.width, window.innerWidth * 0.9) + 'px';
       const baseline = fontSize;
       ctx.font = `bold ${fontSize}px monospace`;
-      ctx.fillStyle = '#ffd700';
+      ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--pac-color') || '#ffd700';
       ctx.fillText(text, 10, baseline);
       const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const step = 4;
@@ -112,26 +124,26 @@
         }
       }
       function drawDots() {
-        ctx.fillStyle = '#ffd700';
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--pac-color') || '#ffd700';
         dots.forEach(d => { ctx.beginPath(); ctx.arc(d.x, d.y, step / 2 - 1, 0, Math.PI * 2); ctx.fill(); });
       }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawDots();
-      const pacRadius = 15;
+      const pacRadius = Math.max(10, Math.round(fontSize / 6));
       const monsterRadius = pacRadius + 5;
       const path = [
-        { x: -pacRadius * 2, y: canvas.height / 2 },
-        { x: canvas.width + pacRadius * 2, y: canvas.height / 2 },
+        { x: -pacRadius * 2, y: canvas.height + pacRadius * 2 },
+        { x: canvas.width + pacRadius * 2, y: canvas.height + pacRadius * 2 },
         { x: canvas.width + pacRadius * 2, y: -pacRadius * 2 },
         { x: -pacRadius * 2, y: -pacRadius * 2 },
         { x: -pacRadius * 2, y: canvas.height + pacRadius * 2 }
       ];
       const monsterPath = [
-        { x: canvas.width + monsterRadius * 2, y: canvas.height / 2 },
-        { x: -monsterRadius * 2, y: canvas.height / 2 },
-        { x: -monsterRadius * 2, y: canvas.height + monsterRadius * 2 },
         { x: canvas.width + monsterRadius * 2, y: canvas.height + monsterRadius * 2 },
-        { x: canvas.width + monsterRadius * 2, y: -monsterRadius * 2 }
+        { x: -monsterRadius * 2, y: canvas.height + monsterRadius * 2 },
+        { x: -monsterRadius * 2, y: -monsterRadius * 2 },
+        { x: canvas.width + monsterRadius * 2, y: -monsterRadius * 2 },
+        { x: canvas.width + monsterRadius * 2, y: canvas.height + monsterRadius * 2 }
       ];
       let pacX = path[0].x;
       let pacY = path[0].y;
@@ -143,7 +155,7 @@
       let mouth = 0;
       function drawPacman(x = pacX, y = pacY) {
         const angle = 0.25 + Math.abs(Math.sin(mouth)) * 0.25;
-        ctx.fillStyle = "yellow";
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--pac-color') || 'yellow';
         ctx.beginPath();
         ctx.arc(x, y, pacRadius, angle * Math.PI, (2 - angle) * Math.PI);
         ctx.lineTo(x, y);
@@ -151,7 +163,7 @@
         mouth += 0.2;
       }
       function drawMonster() {
-        ctx.fillStyle = "red";
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--ghost-color') || 'red';
         ctx.beginPath();
         ctx.arc(monsterX, monsterY - monsterRadius / 2, monsterRadius, Math.PI, 0);
         ctx.lineTo(monsterX + monsterRadius, monsterY + monsterRadius);
@@ -184,7 +196,7 @@
           if (Math.hypot(dx, dy) < pacRadius - 2) return false;
           ctx.beginPath();
           ctx.arc(d.x, d.y, step / 2 - 1, 0, Math.PI * 2);
-          ctx.fillStyle = '#ffd700';
+          ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--pac-color') || '#ffd700';
           ctx.fill();
           return true;
         });
@@ -224,7 +236,7 @@
         requestAnimationFrame(flipAnim);
       }
       document.querySelector('h1.title').style.display = 'none';
-      setTimeout(animate, 1000);
+      setTimeout(() => requestAnimationFrame(animate), 1000);
     });
     document.getElementById('toggleTheme').addEventListener('click', () => document.documentElement.classList.toggle('dark'));
   </script>
