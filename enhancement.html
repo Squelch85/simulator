@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>아이템 강화 시뮬레이터</title>
   <style>
     :root {
@@ -13,6 +13,9 @@
       --control-bg: #eeeeee;
       --control-hover: #dddddd;
       --shadow: rgba(0,0,0,0.1);
+      --safe-color: #d0ffd0;
+      --break-color: #ffd0d0;
+      --target-color: #fff2aa;
     }
     html.dark {
       --bg-color: #121212;
@@ -22,6 +25,9 @@
       --control-bg: #2c2c2c;
       --control-hover: #3a3a3a;
       --shadow: rgba(0,0,0,0.5);
+      --safe-color: #295929;
+      --break-color: #592929;
+      --target-color: #665c1a;
     }
     body {
       font-family: sans-serif;
@@ -30,23 +36,28 @@
       background: var(--bg-color);
       color: var(--text-color);
       transition: background-color .3s, color .3s;
+      touch-action: manipulation;
     }
     .theme-toggle { position: absolute; top: 10px; right: 10px; }
     .theme-btn { background: none; border: none; font-size: 1.5rem; filter: grayscale(100%); cursor: pointer; transition: filter .3s; color: var(--text-color); }
     .theme-btn:hover { filter: grayscale(0%); }
-    .controls { display: flex; gap: 4px; margin-bottom: 8px; }
-    .controls button { padding: 4px 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); }
+    .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-bottom: 8px; }
+    .controls button { flex:1; padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 1rem; }
     .controls button:hover { background: var(--control-hover); }
     #enhance-bar { display: flex; gap: 4px; margin-bottom: 8px; }
     .step { flex: 1; padding: 4px; text-align: center; border: 1px solid var(--border-color); background: var(--control-bg); cursor: pointer; }
-    .step.selected { background: var(--control-hover); }
-    .step.safe { font-weight: bold; }
-    #entry-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 8px; }
-    .slot { width: 60px; height: 60px; border: 1px solid var(--border-color); background: var(--container-bg); display: flex; align-items: center; justify-content: center; }
-    .card { font-weight: bold; }
+    .step.selected { outline: 2px solid var(--target-color); }
+    .step.safe { background: var(--safe-color); }
+    .step.break { background: var(--break-color); }
+    #entry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 4px; margin-bottom: 8px; }
+    .slot { width: 70px; height: 70px; border: 1px solid var(--border-color); background: var(--container-bg); display: flex; align-items: center; justify-content: center; }
+    .card { font-weight: bold; font-size: 0.8rem; text-align: center; }
     .success { animation: successFlash 0.5s; }
     .fail { animation: failFlash 0.5s; }
     .guide { margin: 4px 0; font-size: 0.9rem; color: var(--text-color); }
+    .run-controls { display: flex; gap: 4px; justify-content: center; margin-bottom: 8px; }
+    .run-controls button { flex:1; padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 1rem; }
+    .run-controls button:hover { background: var(--control-hover); }
     @keyframes successFlash { from { background: green; } to { background: inherit; } }
     @keyframes failFlash { from { background: red; } to { background: inherit; } }
   </style>
@@ -62,8 +73,11 @@
   <div id="enhance-bar"></div>
   <div id="entry-grid"></div>
   <p class="guide">목표 단계(강화 바)를 선택 후 실행하세요</p>
-  <label><input type="checkbox" id="blessScroll"> 축복 두루마리</label>
-  <button onclick="enhanceAllSteps()">강화 실행</button>
+  <div class="run-controls">
+    <button onclick="enhanceOnce()">+1</button>
+    <button onclick="enhanceOnce(true)">축복</button>
+    <button onclick="enhanceAllSteps()">다중강화</button>
+  </div>
 
   <script>
     // 1) entries 선언 및 슬롯 초기화
@@ -83,10 +97,15 @@
       updateStepBar();
     }
     function updateStepBar() {
-      const safeLevel = entries[0]?.safeLevel || 0;
+      const item = entries[0];
+      const safeLevel = item?.safeLevel || 0;
+      const rateTable = item ? enhanceRates[`${item.type}_${item.safeLevel}`] : null;
       document.querySelectorAll('.step').forEach((el, i) => {
-        el.classList.toggle('selected', i < selectedTarget);
-        el.classList.toggle('safe',     i < safeLevel);
+        const level = i + 1;
+        const breakable = rateTable?.[String(level - 1)]?.break;
+        el.classList.toggle('selected', level <= selectedTarget);
+        el.classList.toggle('safe',     level <= safeLevel);
+        el.classList.toggle('break',    !!breakable);
       });
     }
     document.getElementById("enhance-bar").innerHTML =
@@ -119,7 +138,7 @@
         if (item && !item.destroyed) {
           const card = document.createElement('div');
           card.className = 'card';
-          card.textContent = `${item.type[0]}+${item.level}`;
+          card.textContent = `${item.type}(${item.safeLevel}안전)+${item.level}`;
           card.dataset.id = item.id;
           slot.appendChild(card);
         }
@@ -194,10 +213,7 @@
       });
     }
 
-    async function enhanceAllSteps() {
-      const bless = document.getElementById('blessScroll').checked;
-
-      // 즉시 안전강화
+    async function enhanceOnce(bless = false) {
       entries.forEach(it => {
         if (it.level < it.safeLevel && selectedTarget >= it.safeLevel) {
           it.level = it.safeLevel;
@@ -205,34 +221,36 @@
       });
       renderEntries();
 
-      // 본격 강화 루프
-      while (entries.some(it => !it.destroyed && it.level < selectedTarget)) {
-        const promises = entries.map(item => {
-          if (item.destroyed || item.level >= selectedTarget) return Promise.resolve();
-          if (item.level < item.safeLevel && selectedTarget >= item.safeLevel) {
-            return Promise.resolve();
-          }
-
-          const result = getEnhanceResult(item, bless);
-          item.destroyed = result.destroyed;
-          const card = document.querySelector(`.card[data-id="${item.id}"]`);
-          if (result.success) {
-            item.level += result.increment;
-            return waitForAnim(card, 'success');
-          } else if (result.destroyed) {
-            return waitForAnim(card, 'fail');
-          }
+      const promises = entries.map(item => {
+        if (item.destroyed || item.level >= selectedTarget) return Promise.resolve();
+        if (item.level < item.safeLevel && selectedTarget >= item.safeLevel) {
           return Promise.resolve();
-        });
-
-        await Promise.all(promises);
-
-        // 일괄 제거 및 재렌더
-        for (let i = entries.length - 1; i >= 0; i--) {
-          if (entries[i].destroyed) entries.splice(i, 1);
         }
-        renderEntries();
-        updateStepBar();
+
+        const result = getEnhanceResult(item, bless);
+        item.destroyed = result.destroyed;
+        const card = document.querySelector(`.card[data-id="${item.id}"]`);
+        if (result.success) {
+          item.level += result.increment;
+          return waitForAnim(card, 'success');
+        } else if (result.destroyed) {
+          return waitForAnim(card, 'fail');
+        }
+        return Promise.resolve();
+      });
+
+      await Promise.all(promises);
+
+      for (let i = entries.length - 1; i >= 0; i--) {
+        if (entries[i].destroyed) entries.splice(i, 1);
+      }
+      renderEntries();
+      updateStepBar();
+    }
+
+    async function enhanceAllSteps() {
+      while (entries.some(it => !it.destroyed && it.level < selectedTarget)) {
+        await enhanceOnce();
         await new Promise(r => requestAnimationFrame(r));
       }
     }
