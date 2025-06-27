@@ -5,11 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>아이템 강화 시뮬레이터</title>
   <style>
-    /* ...기존 스타일 유지... */
+    :root {
+      --bg-color: #f4f4f4;
+      --text-color: #000000;
+      --container-bg: #ffffff;
+      --border-color: #dddddd;
+      --control-bg: #eeeeee;
+      --control-hover: #dddddd;
+      --shadow: rgba(0,0,0,0.1);
+    }
+    html.dark {
+      --bg-color: #121212;
+      --text-color: #e0e0e0;
+      --container-bg: #1e1e1e;
+      --border-color: #333333;
+      --control-bg: #2c2c2c;
+      --control-hover: #3a3a3a;
+      --shadow: rgba(0,0,0,0.5);
+    }
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 16px;
+      background: var(--bg-color);
+      color: var(--text-color);
+      transition: background-color .3s, color .3s;
+    }
+    .theme-toggle { position: absolute; top: 10px; right: 10px; }
+    .theme-btn { background: none; border: none; font-size: 1.5rem; filter: grayscale(100%); cursor: pointer; transition: filter .3s; color: var(--text-color); }
+    .theme-btn:hover { filter: grayscale(0%); }
+    .controls { display: flex; gap: 4px; margin-bottom: 8px; }
+    .controls button { padding: 4px 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); }
+    .controls button:hover { background: var(--control-hover); }
+    #enhance-bar { display: flex; gap: 4px; margin-bottom: 8px; }
+    .step { flex: 1; padding: 4px; text-align: center; border: 1px solid var(--border-color); background: var(--control-bg); cursor: pointer; }
+    .step.selected { background: var(--control-hover); }
+    .step.safe { font-weight: bold; }
+    #entry-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 8px; }
+    .slot { width: 60px; height: 60px; border: 1px solid var(--border-color); background: var(--container-bg); display: flex; align-items: center; justify-content: center; }
+    .card { font-weight: bold; }
+    .success { animation: successFlash 0.5s; }
+    .fail { animation: failFlash 0.5s; }
+    @keyframes successFlash { from { background: green; } to { background: inherit; } }
+    @keyframes failFlash { from { background: red; } to { background: inherit; } }
   </style>
 </head>
 <body>
-  <!-- ...기존 HTML 구조 유지... -->
+  <div class="theme-toggle"><button id="toggleTheme" class="theme-btn">🌙</button></div>
+  <h1>아이템 강화 시뮬레이터</h1>
+  <div class="controls">
+    <button onclick="registerItem('무기', 6)">무기 등록</button>
+    <button onclick="registerItem('방어구', 1)">방어구 등록</button>
+    <button onclick="resetAll()">초기화</button>
+  </div>
+  <div id="enhance-bar"></div>
+  <div id="entry-grid"></div>
+  <label><input type="checkbox" id="blessScroll"> 축복 두루마리</label>
+  <button onclick="enhanceAllSteps()">강화 실행</button>
 
   <script>
     // 1) entries 선언 및 슬롯 초기화
@@ -181,6 +233,7 @@
         await new Promise(r => requestAnimationFrame(r));
       }
     }
+    document.getElementById('toggleTheme').addEventListener('click', () => document.documentElement.classList.toggle('dark'));
   </script>
 </body>
 </html>
