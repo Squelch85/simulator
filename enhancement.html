@@ -42,7 +42,13 @@
     .theme-btn { background: none; border: none; font-size: 1.5rem; filter: grayscale(100%); cursor: pointer; transition: filter .3s; color: var(--text-color); }
     .theme-btn:hover { filter: grayscale(0%); }
     .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 4px; margin-bottom: 8px; }
-    #reg-controls { grid-column: 1 / -1; display: contents; }
+    #reg-controls {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+    #reg-controls button { width: 100%; }
     .reset-row { grid-column: 1 / -1; display: flex; justify-content: center; }
     .controls button { padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 0.8rem; }
     .controls button:hover { background: var(--control-hover); }
@@ -53,7 +59,26 @@
     .step.break { background: var(--break-color); }
     #entry-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 4px; margin-bottom: 8px; justify-items: center; }
     .slot { width: 100%; max-width: 70px; aspect-ratio: 1 / 1; border: 1px solid var(--border-color); background: var(--container-bg); display: flex; align-items: center; justify-content: center; }
-    .card { font-weight: bold; font-size: 0.6rem; text-align: center; }
+    .card {
+      position: relative;
+      font-weight: bold;
+      font-size: 0.7rem;
+      text-align: center;
+    }
+    .card .img {
+      width: 32px;
+      height: 32px;
+      margin: 0 auto 2px;
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+    .card .name { font-size: 0.7rem; }
+    .card .level { font-size: 0.8rem; }
+    .card.type-무기 .img { background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc1MCc+8J+XoTwvdGV4dD48L3N2Zz4='); }
+    .card.type-방어구 .img { background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc1MCc+8J+boTwvdGV4dD48L3N2Zz4='); }
+    .card.type-그로아-장비 .img { background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc1MCc+4pqZPC90ZXh0Pjwvc3ZnPg=='); }
+    .card.type-장신구 .img { background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc1MCc+8J+SjTwvdGV4dD48L3N2Zz4='); }
+    .card.type-컬렉션-전용-아이템 .img { background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc1MCc+8J+TpjwvdGV4dD48L3N2Zz4='); }
     .success { animation: successFlash 0.5s; }
     .fail { animation: failFlash 0.5s; }
     .guide { margin: 4px 0; font-size: 0.9rem; color: var(--text-color); }
@@ -158,15 +183,33 @@
       renderEntries();
       updateStepBar();
     }
+    function typeClass(type) {
+      return 'type-' + type.replace(/\s+/g, '-');
+    }
+
     function renderEntries() {
       entryGrid.querySelectorAll('.slot').forEach((slot, i) => {
         slot.innerHTML = '';
         const item = entries[i];
         if (item && !item.destroyed) {
           const card = document.createElement('div');
-          card.className = 'card';
-          card.innerHTML = `${item.type}<br>+${item.level}`;
+          card.className = 'card ' + typeClass(item.type);
           card.dataset.id = item.id;
+
+          const img = document.createElement('div');
+          img.className = 'img';
+          card.appendChild(img);
+
+          const name = document.createElement('div');
+          name.className = 'name';
+          name.textContent = item.type;
+          card.appendChild(name);
+
+          const level = document.createElement('div');
+          level.className = 'level';
+          level.textContent = `+${item.level}`;
+          card.appendChild(level);
+
           slot.appendChild(card);
         }
       });
