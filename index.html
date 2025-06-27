@@ -53,6 +53,7 @@
     }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     #titleCanvas {
+  max-width: 90vw; height: auto;
       display:block;
       margin:0 auto 1rem;
       transform: translateY(-200%);
@@ -91,7 +92,7 @@
       const canvas = document.getElementById('titleCanvas');
       const ctx = canvas.getContext('2d');
       const text = '아키워 헬퍼';
-      const fontSize = 100;
+      const fontSize = Math.min(100, window.innerWidth * 0.15);
       ctx.font = `bold ${fontSize}px monospace`;
       const metrics = ctx.measureText(text);
       canvas.width = metrics.width + 20;
@@ -116,38 +117,66 @@
       }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawDots();
-      let pacX = -20;
-      let pacY = canvas.height / 2;
-      const startX = pacX;
-      const startY = pacY;
       const pacRadius = 15;
-      const monsterX = canvas.width * 0.75;
       const monsterRadius = pacRadius + 5;
-      const duration = 4000;
-      const amplitude = canvas.height / 4;
+      const path = [
+        { x: -pacRadius * 2, y: canvas.height / 2 },
+        { x: canvas.width + pacRadius * 2, y: canvas.height / 2 },
+        { x: canvas.width + pacRadius * 2, y: -pacRadius * 2 },
+        { x: -pacRadius * 2, y: -pacRadius * 2 },
+        { x: -pacRadius * 2, y: canvas.height + pacRadius * 2 }
+      ];
+      const monsterPath = [
+        { x: canvas.width + monsterRadius * 2, y: canvas.height / 2 },
+        { x: -monsterRadius * 2, y: canvas.height / 2 },
+        { x: -monsterRadius * 2, y: canvas.height + monsterRadius * 2 },
+        { x: canvas.width + monsterRadius * 2, y: canvas.height + monsterRadius * 2 },
+        { x: canvas.width + monsterRadius * 2, y: -monsterRadius * 2 }
+      ];
+      let pacX = path[0].x;
+      let pacY = path[0].y;
+      let monsterX = monsterPath[0].x;
+      let monsterY = monsterPath[0].y;
+      const duration = 6000;
+      const segmentCount = path.length - 1;
       let startTime;
       let mouth = 0;
-      function drawPacman() {
+      function drawPacman(x = pacX, y = pacY) {
         const angle = 0.25 + Math.abs(Math.sin(mouth)) * 0.25;
-        ctx.fillStyle = 'yellow';
+        ctx.fillStyle = "yellow";
         ctx.beginPath();
-        ctx.arc(pacX, pacY, pacRadius, angle * Math.PI, (2 - angle) * Math.PI);
-        ctx.lineTo(pacX, pacY);
+        ctx.arc(x, y, pacRadius, angle * Math.PI, (2 - angle) * Math.PI);
+        ctx.lineTo(x, y);
         ctx.fill();
         mouth += 0.2;
       }
       function drawMonster() {
-        ctx.fillStyle = 'red';
+        ctx.fillStyle = "red";
         ctx.beginPath();
-        ctx.arc(monsterX, startY, monsterRadius, 0, Math.PI * 2);
+        ctx.arc(monsterX, monsterY - monsterRadius / 2, monsterRadius, Math.PI, 0);
+        ctx.lineTo(monsterX + monsterRadius, monsterY + monsterRadius);
+        ctx.lineTo(monsterX + monsterRadius * 0.5, monsterY + monsterRadius * 0.8);
+        ctx.lineTo(monsterX, monsterY + monsterRadius);
+        ctx.lineTo(monsterX - monsterRadius * 0.5, monsterY + monsterRadius * 0.8);
+        ctx.lineTo(monsterX - monsterRadius, monsterY + monsterRadius);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(monsterX - monsterRadius/3, monsterY - monsterRadius/2, monsterRadius/4, 0, Math.PI * 2);
+        ctx.arc(monsterX + monsterRadius/3, monsterY - monsterRadius/2, monsterRadius/4, 0, Math.PI * 2);
         ctx.fill();
       }
       function animate(timestamp) {
         if (!startTime) startTime = timestamp;
         const t = Math.min((timestamp - startTime) / duration, 1);
-        pacX = startX + (monsterX - startX) * t;
-        pacY = startY + amplitude * Math.sin(t * Math.PI * 4);
-        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--bg-color') || '#000';
+        const seg = Math.min(Math.floor(t * segmentCount), segmentCount - 1);
+        const tt = t * segmentCount - seg;
+        pacX = path[seg].x + (path[seg+1].x - path[seg].x) * tt;
+        pacY = path[seg].y + (path[seg+1].y - path[seg].y) * tt;
+        monsterX = monsterPath[seg].x + (monsterPath[seg+1].x - monsterPath[seg].x) * tt;
+        monsterY = monsterPath[seg].y + (monsterPath[seg+1].y - monsterPath[seg].y) * tt;
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue("--bg-color") || "#000";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         dots = dots.filter(d => {
           const dx = d.x - pacX;
@@ -165,14 +194,34 @@
         requestAnimationFrame(animate);
       }
       function finish() {
-        canvas.style.transition = 'opacity 1s';
-        canvas.style.opacity = '0';
-        setTimeout(() => {
-          canvas.style.display = 'none';
-          const title = document.querySelector('h1.title');
-          title.style.display = 'block';
-          title.classList.add('show');
-        }, 1000);
+        const flipDur = 500;
+        let flipStart;
+        function flipAnim(ts) {
+          if (!flipStart) flipStart = ts;
+          const p = Math.min((ts - flipStart) / flipDur, 1);
+          ctx.fillStyle = getComputedStyle(document.body).getPropertyValue("--bg-color") || "#000";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          drawDots();
+          ctx.save();
+          ctx.translate(pacX, pacY);
+          ctx.scale(Math.cos(p * Math.PI), 1);
+          drawPacman(0, 0);
+          ctx.restore();
+          drawMonster();
+          if (p < 1) {
+            requestAnimationFrame(flipAnim);
+          } else {
+            canvas.style.transition = "opacity 1s";
+            canvas.style.opacity = "0";
+            setTimeout(() => {
+              canvas.style.display = "none";
+              const title = document.querySelector("h1.title");
+              title.style.display = "block";
+              title.classList.add("show");
+            }, 1000);
+          }
+        }
+        requestAnimationFrame(flipAnim);
       }
       document.querySelector('h1.title').style.display = 'none';
       setTimeout(animate, 1000);
