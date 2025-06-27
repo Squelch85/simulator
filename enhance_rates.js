@@ -176,5 +176,45 @@ window.enhanceRates = {
       "10": { "base":0.1, "bless":[0.1], "break":true },
       "11": { "base":0.05, "bless":[0.05], "break":true }
     }
+  },
+  "유물": {
+    "0": {
+      "0": { "base":1.0, "bless":[1.0], "break":false },
+      "1": { "base":0.75, "bless":[0.75], "break":true },
+      "2": { "base":0.6, "bless":[0.6], "break":true },
+      "3": { "base":0.5, "bless":[0.5], "break":true },
+      "4": { "base":0.5, "bless":[0.5], "break":true },
+      "5": { "base":0.25, "bless":[0.25], "break":true },
+      "6": { "base":0.25, "bless":[0.25], "break":true },
+      "7": { "base":0.25, "bless":[0.25], "break":true },
+      "8": { "base":0.25, "bless":[0.25], "break":true },
+      "9": { "base":0.25, "bless":[0.25], "break":true },
+      "10": { "base":0.3333, "bless":[0.3333], "break":true },
+      "11": { "base":0.5, "bless":[0.5], "break":true }
+    }
+  },
+  "페르디타": {
+    "0": {
+      "0": { "base":1.0, "bless":[1.0], "break":false },
+      "1": { "base":0.75, "bless":[0.75], "break":true },
+      "2": { "base":0.6, "bless":[0.6], "break":true },
+      "3": { "base":0.5, "bless":[0.5], "break":true },
+      "4": { "base":0.5, "bless":[0.5], "break":true },
+      "5": { "base":0.25, "bless":[0.25], "break":true },
+      "6": { "base":0.25, "bless":[0.25], "break":true },
+      "7": { "base":0.25, "bless":[0.25], "break":true },
+      "8": { "base":0.25, "bless":[0.25], "break":true },
+      "9": { "base":0.25, "bless":[0.25], "break":true },
+      "10": { "base":0.3333, "bless":[0.3333], "break":true },
+      "11": { "base":0.5, "bless":[0.5], "break":true },
+      "12": { "base":0.5, "bless":[0.5], "break":true },
+      "13": { "base":0.5, "bless":[0.5], "break":true },
+      "14": { "base":0.5, "bless":[0.5], "break":true },
+      "15": { "base":0.5, "bless":[0.5], "break":true },
+      "16": { "base":0.5, "bless":[0.5], "break":true },
+      "17": { "base":0.5, "bless":[0.5], "break":true },
+      "18": { "base":0.5, "bless":[0.5], "break":true },
+      "19": { "base":0.5, "bless":[0.5], "break":true }
+    }
   }
 };
