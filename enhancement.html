@@ -75,35 +75,52 @@
     <button onclick="enhanceAllSteps()">다중강화</button>
   </div>
 
-  <script src="enhance_rates.js"></script>
+  <script src="enhance_rates.js" defer></script>
   <script>
-    // 1) entries 선언 및 슬롯 초기화
     const entries = [];
-    const entryGrid = document.getElementById('entry-grid');
-    for (let i = 0; i < 20; i++) {
-      const slot = document.createElement('div');
-      slot.className = 'slot';
-      entryGrid.appendChild(slot);
+    let entryGrid;
+    let selectedTarget = 1;
+
+    function populateControls() {
+      const regControls = document.getElementById('reg-controls');
+      regControls.innerHTML = '';
+      const types = Object.keys(window.enhanceRates).sort();
+      types.forEach(type => {
+        const levels = Object.keys(window.enhanceRates[type])
+          .map(Number)
+          .sort((a, b) => a - b);
+        levels.forEach(safe => {
+          const btn = document.createElement('button');
+          btn.textContent = `${type}(${safe}안전) 등록`;
+          btn.onclick = () => registerItem(type, safe);
+          regControls.appendChild(btn);
+        });
+      });
+      const resetBtn = document.createElement('button');
+      resetBtn.textContent = '초기화';
+      resetBtn.onclick = resetAll;
+      regControls.appendChild(resetBtn);
     }
 
-    // 등록 버튼 동적 생성
-    const regControls = document.getElementById('reg-controls');
-    Object.entries(window.enhanceRates).forEach(([type, map]) => {
-      Object.keys(map).forEach(safe => {
-        const btn = document.createElement('button');
-        btn.textContent = `${type}(${safe}안전) 등록`;
-        btn.onclick = () => registerItem(type, parseInt(safe));
-        regControls.appendChild(btn);
-      });
+    document.addEventListener('DOMContentLoaded', () => {
+      entryGrid = document.getElementById('entry-grid');
+      for (let i = 0; i < 20; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'slot';
+        entryGrid.appendChild(slot);
+      }
+      populateControls();
+      document.getElementById("enhance-bar").innerHTML =
+        Array.from({ length: 12 }, (_, i) =>
+          `<div class="step" onclick="setTargetLevel(${i + 1})">+${i + 1}</div>`
+        ).join('');
+      updateStepBar();
+      document.getElementById('toggleTheme')
+        .addEventListener('click', () =>
+          document.documentElement.classList.toggle('dark'));
     });
-    const resetBtn = document.createElement('button');
-    resetBtn.textContent = '초기화';
-    resetBtn.onclick = resetAll;
-    regControls.appendChild(resetBtn);
 
     // 2) 상단 강화바 생성 & 클릭 핸들러
-    let selectedTarget = 1;
-    updateStepBar();
     function setTargetLevel(n) {
       selectedTarget = n;
       updateStepBar();
@@ -120,11 +137,7 @@
         el.classList.toggle('break',    !!breakable);
       });
     }
-    document.getElementById("enhance-bar").innerHTML =
-      Array.from({ length: 12 }, (_, i) =>
-        `<div class="step" onclick="setTargetLevel(${i+1})">+${i+1}</div>`
-      ).join('');
-    updateStepBar();
+
 
     // 3) 아이템 등록/렌더/리셋
     function registerItem(type, safeLevel) {
@@ -235,7 +248,6 @@
         await new Promise(r => requestAnimationFrame(r));
       }
     }
-    document.getElementById('toggleTheme').addEventListener('click', () => document.documentElement.classList.toggle('dark'));
   </script>
 </body>
 </html>
