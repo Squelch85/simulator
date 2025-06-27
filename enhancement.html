@@ -107,7 +107,8 @@
           .sort((a, b) => a - b);
         levels.forEach(safe => {
           const btn = document.createElement('button');
-          btn.textContent = `${type} ${safe}안전`;
+          const short = shortNames[type] || type;
+          btn.textContent = `${short} ${safe}안전`;
           btn.onclick = () => registerItem(type, safe);
           if (regControls.children.length < 6) {
             regControls.appendChild(btn);
@@ -192,8 +193,7 @@
         if (item && !item.destroyed) {
           const card = document.createElement('div');
           card.className = 'card';
-          const short = shortNames[item.type] || item.type;
-          card.innerHTML = `${short}<br>(${item.safeLevel}안)`;
+          card.innerHTML = `${item.type}<br>+${item.level}`;
           card.dataset.id = item.id;
           slot.appendChild(card);
         }
@@ -231,14 +231,14 @@
     }
 
     async function enhanceOnce(bless = false, useTarget = false) {
-      entries.forEach(it => {
-        if (it.level < it.safeLevel) {
-          if (!useTarget || selectedTarget >= it.safeLevel) {
-            it.level = it.safeLevel;
-          }
+        if (useTarget) {
+          entries.forEach(it => {
+            if (it.level < it.safeLevel && selectedTarget >= it.safeLevel) {
+              it.level = it.safeLevel;
+            }
+          });
         }
-      });
-      renderEntries();
+        renderEntries();
 
       const promises = entries.map(item => {
         if (item.destroyed) return Promise.resolve();
@@ -247,8 +247,6 @@
           if (item.level < item.safeLevel && selectedTarget >= item.safeLevel) {
             return Promise.resolve();
           }
-        } else if (item.level < item.safeLevel) {
-          return Promise.resolve();
         }
 
         const result = getEnhanceResult(item, bless);
