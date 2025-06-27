@@ -54,9 +54,9 @@
     .step.selected { outline: 2px solid var(--target-color); }
     .step.safe { background: var(--safe-color); }
     .step.break { background: var(--break-color); }
-    #entry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 4px; margin-bottom: 8px; }
+    #entry-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 8px; }
     .slot { width: 70px; height: 70px; border: 1px solid var(--border-color); background: var(--container-bg); display: flex; align-items: center; justify-content: center; }
-    .card { font-weight: bold; font-size: 0.7rem; text-align: center; }
+    .card { font-weight: bold; font-size: 0.6rem; text-align: center; }
     .success { animation: successFlash 0.5s; }
     .fail { animation: failFlash 0.5s; }
     .guide { margin: 4px 0; font-size: 0.9rem; color: var(--text-color); }
@@ -88,6 +88,13 @@
     const entries = [];
     let entryGrid;
     let selectedTarget = 1;
+    const shortNames = {
+      '무기': '무',
+      '방어구': '방',
+      '그로아 장비': '그로',
+      '장신구': '장',
+      '컬렉션 전용 아이템': '컬렉'
+    };
 
     function populateControls() {
       const regControls = document.getElementById('reg-controls');
@@ -179,13 +186,14 @@
       updateStepBar();
     }
     function renderEntries() {
-      entryGrid.querySelectorAll('.slot').forEach((slot,i) => {
+      entryGrid.querySelectorAll('.slot').forEach((slot, i) => {
         slot.innerHTML = '';
         const item = entries[i];
         if (item && !item.destroyed) {
           const card = document.createElement('div');
           card.className = 'card';
-          card.textContent = `${item.type}(${item.safeLevel}안전)+${item.level}`;
+          const short = shortNames[item.type] || item.type;
+          card.innerHTML = `${short}<br>(${item.safeLevel}안)`;
           card.dataset.id = item.id;
           slot.appendChild(card);
         }
@@ -203,19 +211,12 @@
     function getEnhanceResult(item, bless) {
       const rates = window.enhanceRates[item.type]?.[item.safeLevel]?.[String(item.level)];
       if (!rates) return { success:false, destroyed:false, increment:0 };
-      let success = false, increment = 1;
-      if (bless && rates.bless.length > 1) {
-        const rnd = Math.random(), arr = rates.bless;
-        let acc = 0;
-        for (let i = 0; i < arr.length; i++) {
-          acc += arr[i];
-          if (rnd < acc) { success = true; increment = i+1; break; }
-        }
-      } else {
-        success = Math.random() < rates.base;
-      }
+      const rate = bless
+        ? rates.bless.reduce((a, b) => a + b, 0)
+        : rates.base;
+      const success = Math.random() < rate;
       return success
-        ? { success:true, destroyed:false, increment }
+        ? { success:true, destroyed:false, increment:1 }
         : { success:false, destroyed:rates.break, increment:0 };
     }
 
