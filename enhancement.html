@@ -46,9 +46,6 @@
     .reset-row { grid-column: 1 / -1; display: flex; justify-content: center; }
     .controls button { padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 0.8rem; }
     .controls button:hover { background: var(--control-hover); }
-    .more-wrapper { position: relative; }
-    .more-tooltip { display: none; position: absolute; top: 100%; left: 0; background: var(--container-bg); border: 1px solid var(--border-color); padding: 4px; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 4px; z-index: 10; }
-    .more-wrapper:hover .more-tooltip { display: grid; }
     #enhance-bar { display: flex; gap: 4px; margin-bottom: 8px; }
     .step { flex: 1; padding: 4px; text-align: center; border: 1px solid var(--border-color); background: var(--control-bg); cursor: pointer; }
     .step.selected { outline: 2px solid var(--target-color); }
@@ -92,7 +89,6 @@
     function populateControls() {
       const regControls = document.getElementById('reg-controls');
       regControls.innerHTML = '';
-      const extra = [];
       const types = Object.keys(window.enhanceRates).sort();
       types.forEach(type => {
         const levels = Object.keys(window.enhanceRates[type])
@@ -100,27 +96,11 @@
           .sort((a, b) => a - b);
         levels.forEach(safe => {
           const btn = document.createElement('button');
-            btn.textContent = `${type} ${safe}안전`;
-            btn.onclick = () => registerItem(type, safe);
-          if (regControls.children.length < 6) {
-            regControls.appendChild(btn);
-          } else {
-            extra.push(btn);
-          }
+          btn.textContent = `${type} ${safe}안전`;
+          btn.onclick = () => registerItem(type, safe);
+          regControls.appendChild(btn);
         });
       });
-      if (extra.length) {
-        const wrap = document.createElement('div');
-        wrap.className = 'more-wrapper';
-        const moreBtn = document.createElement('button');
-        moreBtn.textContent = '더보기';
-        const tip = document.createElement('div');
-        tip.className = 'more-tooltip';
-        extra.forEach(b => tip.appendChild(b));
-        wrap.appendChild(moreBtn);
-        wrap.appendChild(tip);
-        regControls.appendChild(wrap);
-      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
