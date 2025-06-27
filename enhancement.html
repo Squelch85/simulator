@@ -46,6 +46,7 @@
     .card { font-weight: bold; }
     .success { animation: successFlash 0.5s; }
     .fail { animation: failFlash 0.5s; }
+    .guide { margin: 4px 0; font-size: 0.9rem; color: var(--text-color); }
     @keyframes successFlash { from { background: green; } to { background: inherit; } }
     @keyframes failFlash { from { background: red; } to { background: inherit; } }
   </style>
@@ -60,6 +61,7 @@
   </div>
   <div id="enhance-bar"></div>
   <div id="entry-grid"></div>
+  <p class="guide">목표 단계(강화 바)를 선택 후 실행하세요</p>
   <label><input type="checkbox" id="blessScroll"> 축복 두루마리</label>
   <button onclick="enhanceAllSteps()">강화 실행</button>
 
@@ -74,7 +76,8 @@
     }
 
     // 2) 상단 강화바 생성 & 클릭 핸들러
-    let selectedTarget = 0;
+    let selectedTarget = 1;
+    updateStepBar();
     function setTargetLevel(n) {
       selectedTarget = n;
       updateStepBar();
