@@ -88,13 +88,6 @@
     const entries = [];
     let entryGrid;
     let selectedTarget = 1;
-    const shortNames = {
-      '무기': '무',
-      '방어구': '방',
-      '그로아 장비': '그로',
-      '장신구': '장',
-      '컬렉션 전용 아이템': '컬렉'
-    };
 
     function populateControls() {
       const regControls = document.getElementById('reg-controls');
@@ -107,9 +100,8 @@
           .sort((a, b) => a - b);
         levels.forEach(safe => {
           const btn = document.createElement('button');
-          const short = shortNames[type] || type;
-          btn.textContent = `${short} ${safe}안전`;
-          btn.onclick = () => registerItem(type, safe);
+            btn.textContent = `${type} ${safe}안전`;
+            btn.onclick = () => registerItem(type, safe);
           if (regControls.children.length < 6) {
             regControls.appendChild(btn);
           } else {
