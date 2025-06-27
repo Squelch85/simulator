@@ -49,9 +49,10 @@
       gap: 4px;
     }
     #reg-controls button { width: 100%; }
-    .reset-row { grid-column: 1 / -1; display: flex; justify-content: center; }
+    .reset-row { grid-column: 1 / -1; display: flex; justify-content: center; gap: 4px; }
     .controls button { padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 0.8rem; }
     .controls button:hover { background: var(--control-hover); }
+    #resetBtn, #maxBtn { padding: 12px 8px; }
     #enhance-bar { display: flex; gap: 4px; margin-bottom: 8px; }
     .step { flex: 1; padding: 4px; text-align: center; border: 1px solid var(--border-color); background: var(--control-bg); cursor: pointer; }
     .step.selected { outline: 2px solid var(--target-color); }
@@ -100,12 +101,16 @@
   <h1>아이템 강화 시뮬레이터</h1>
   <div class="controls">
     <div id="reg-controls"></div>
-    <div class="reset-row"><button id="resetBtn">초기화</button></div>
+    <div class="reset-row">
+      <button id="resetBtn">초기화</button>
+      <button id="maxBtn">MAX</button>
+    </div>
   </div>
   <div id="enhance-bar"></div>
   <div id="entry-grid"></div>
   <p class="guide">목표 단계(강화 바)를 선택 후 실행하세요</p>
   <div class="run-controls">
+    <button onclick="decreaseAll()">-1</button>
     <button onclick="enhanceOnce()">+1</button>
     <button onclick="enhanceOnce(true)">축복</button>
     <button onclick="enhanceAllSteps()">다중강화</button>
@@ -143,6 +148,7 @@
       }
       populateControls();
       document.getElementById('resetBtn').onclick = resetAll;
+      document.getElementById('maxBtn').onclick = fillMax;
       document.getElementById("enhance-bar").innerHTML =
         Array.from({ length: 20 }, (_, i) =>
           `<div class="step" onclick="setTargetLevel(${i + 1})">+${i + 1}</div>`
@@ -224,6 +230,30 @@
       entries.length = 0;
       renderEntries();
       selectedTarget = 0;
+      updateStepBar();
+    }
+
+    function fillMax() {
+      if (!entries.length) return;
+      const { type, safeLevel } = entries[0];
+      while (entries.length < 40) {
+        entries.push({
+          id: Date.now() + Math.random(),
+          type,
+          level: 0,
+          safeLevel,
+          destroyed: false
+        });
+      }
+      renderEntries();
+      updateStepBar();
+    }
+
+    function decreaseAll() {
+      entries.forEach(it => {
+        if (it.level > 0) it.level--;
+      });
+      renderEntries();
       updateStepBar();
     }
 
