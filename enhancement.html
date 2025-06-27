@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
@@ -41,21 +41,21 @@
     .theme-toggle { position: absolute; top: 10px; right: 10px; }
     .theme-btn { background: none; border: none; font-size: 1.5rem; filter: grayscale(100%); cursor: pointer; transition: filter .3s; color: var(--text-color); }
     .theme-btn:hover { filter: grayscale(0%); }
-    .controls { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 8px; }
+    .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 4px; margin-bottom: 8px; }
     #reg-controls { grid-column: 1 / -1; display: contents; }
     .reset-row { grid-column: 1 / -1; display: flex; justify-content: center; }
     .controls button { padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 0.8rem; }
     .controls button:hover { background: var(--control-hover); }
     .more-wrapper { position: relative; }
-    .more-tooltip { display: none; position: absolute; top: 100%; left: 0; background: var(--container-bg); border: 1px solid var(--border-color); padding: 4px; grid-template-columns: repeat(6, 1fr); gap: 4px; z-index: 10; }
+    .more-tooltip { display: none; position: absolute; top: 100%; left: 0; background: var(--container-bg); border: 1px solid var(--border-color); padding: 4px; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 4px; z-index: 10; }
     .more-wrapper:hover .more-tooltip { display: grid; }
     #enhance-bar { display: flex; gap: 4px; margin-bottom: 8px; }
     .step { flex: 1; padding: 4px; text-align: center; border: 1px solid var(--border-color); background: var(--control-bg); cursor: pointer; }
     .step.selected { outline: 2px solid var(--target-color); }
     .step.safe { background: var(--safe-color); }
     .step.break { background: var(--break-color); }
-    #entry-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 8px; }
-    .slot { width: 70px; height: 70px; border: 1px solid var(--border-color); background: var(--container-bg); display: flex; align-items: center; justify-content: center; }
+    #entry-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 4px; margin-bottom: 8px; justify-items: center; }
+    .slot { width: 100%; max-width: 70px; aspect-ratio: 1 / 1; border: 1px solid var(--border-color); background: var(--container-bg); display: flex; align-items: center; justify-content: center; }
     .card { font-weight: bold; font-size: 0.6rem; text-align: center; }
     .success { animation: successFlash 0.5s; }
     .fail { animation: failFlash 0.5s; }
