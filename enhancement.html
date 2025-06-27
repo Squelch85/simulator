@@ -211,10 +211,18 @@
     function getEnhanceResult(item, bless) {
       const rates = window.enhanceRates[item.type]?.[item.safeLevel]?.[String(item.level)];
       if (!rates) return { success:false, destroyed:false, increment:0 };
-      const rate = bless
-        ? rates.bless.reduce((a, b) => a + b, 0)
-        : rates.base;
-      const success = Math.random() < rate;
+      if (bless) {
+        const r = Math.random();
+        let sum = 0;
+        for (let i = 0; i < rates.bless.length; i++) {
+          sum += rates.bless[i];
+          if (r < sum) {
+            return { success:true, destroyed:false, increment:i + 1 };
+          }
+        }
+        return { success:false, destroyed:rates.break, increment:0 };
+      }
+      const success = Math.random() < rates.base;
       return success
         ? { success:true, destroyed:false, increment:1 }
         : { success:false, destroyed:rates.break, increment:0 };
