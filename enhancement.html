@@ -41,9 +41,14 @@
     .theme-toggle { position: absolute; top: 10px; right: 10px; }
     .theme-btn { background: none; border: none; font-size: 1.5rem; filter: grayscale(100%); cursor: pointer; transition: filter .3s; color: var(--text-color); }
     .theme-btn:hover { filter: grayscale(0%); }
-    .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-bottom: 8px; }
-    .controls button { flex:1; padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 1rem; }
+    .controls { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 8px; }
+    #reg-controls { grid-column: 1 / -1; display: contents; }
+    .reset-row { grid-column: 1 / -1; display: flex; justify-content: center; }
+    .controls button { padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 0.8rem; }
     .controls button:hover { background: var(--control-hover); }
+    .more-wrapper { position: relative; }
+    .more-tooltip { display: none; position: absolute; top: 100%; left: 0; background: var(--container-bg); border: 1px solid var(--border-color); padding: 4px; grid-template-columns: repeat(6, 1fr); gap: 4px; z-index: 10; }
+    .more-wrapper:hover .more-tooltip { display: grid; }
     #enhance-bar { display: flex; gap: 4px; margin-bottom: 8px; }
     .step { flex: 1; padding: 4px; text-align: center; border: 1px solid var(--border-color); background: var(--control-bg); cursor: pointer; }
     .step.selected { outline: 2px solid var(--target-color); }
@@ -51,7 +56,7 @@
     .step.break { background: var(--break-color); }
     #entry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 4px; margin-bottom: 8px; }
     .slot { width: 70px; height: 70px; border: 1px solid var(--border-color); background: var(--container-bg); display: flex; align-items: center; justify-content: center; }
-    .card { font-weight: bold; font-size: 0.8rem; text-align: center; }
+    .card { font-weight: bold; font-size: 0.7rem; text-align: center; }
     .success { animation: successFlash 0.5s; }
     .fail { animation: failFlash 0.5s; }
     .guide { margin: 4px 0; font-size: 0.9rem; color: var(--text-color); }
@@ -65,7 +70,10 @@
 <body>
   <div class="theme-toggle"><button id="toggleTheme" class="theme-btn">🌙</button></div>
   <h1>아이템 강화 시뮬레이터</h1>
-  <div class="controls" id="reg-controls"></div>
+  <div class="controls">
+    <div id="reg-controls"></div>
+    <div class="reset-row"><button id="resetBtn">초기화</button></div>
+  </div>
   <div id="enhance-bar"></div>
   <div id="entry-grid"></div>
   <p class="guide">목표 단계(강화 바)를 선택 후 실행하세요</p>
@@ -84,6 +92,7 @@
     function populateControls() {
       const regControls = document.getElementById('reg-controls');
       regControls.innerHTML = '';
+      const extra = [];
       const types = Object.keys(window.enhanceRates).sort();
       types.forEach(type => {
         const levels = Object.keys(window.enhanceRates[type])
@@ -91,15 +100,27 @@
           .sort((a, b) => a - b);
         levels.forEach(safe => {
           const btn = document.createElement('button');
-          btn.textContent = `${type}(${safe}안전) 등록`;
+          btn.textContent = `${type} ${safe}안전`;
           btn.onclick = () => registerItem(type, safe);
-          regControls.appendChild(btn);
+          if (regControls.children.length < 6) {
+            regControls.appendChild(btn);
+          } else {
+            extra.push(btn);
+          }
         });
       });
-      const resetBtn = document.createElement('button');
-      resetBtn.textContent = '초기화';
-      resetBtn.onclick = resetAll;
-      regControls.appendChild(resetBtn);
+      if (extra.length) {
+        const wrap = document.createElement('div');
+        wrap.className = 'more-wrapper';
+        const moreBtn = document.createElement('button');
+        moreBtn.textContent = '더보기';
+        const tip = document.createElement('div');
+        tip.className = 'more-tooltip';
+        extra.forEach(b => tip.appendChild(b));
+        wrap.appendChild(moreBtn);
+        wrap.appendChild(tip);
+        regControls.appendChild(wrap);
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -110,6 +131,7 @@
         entryGrid.appendChild(slot);
       }
       populateControls();
+      document.getElementById('resetBtn').onclick = resetAll;
       document.getElementById("enhance-bar").innerHTML =
         Array.from({ length: 12 }, (_, i) =>
           `<div class="step" onclick="setTargetLevel(${i + 1})">+${i + 1}</div>`
@@ -207,17 +229,24 @@
       });
     }
 
-    async function enhanceOnce(bless = false) {
+    async function enhanceOnce(bless = false, useTarget = false) {
       entries.forEach(it => {
-        if (it.level < it.safeLevel && selectedTarget >= it.safeLevel) {
-          it.level = it.safeLevel;
+        if (it.level < it.safeLevel) {
+          if (!useTarget || selectedTarget >= it.safeLevel) {
+            it.level = it.safeLevel;
+          }
         }
       });
       renderEntries();
 
       const promises = entries.map(item => {
-        if (item.destroyed || item.level >= selectedTarget) return Promise.resolve();
-        if (item.level < item.safeLevel && selectedTarget >= item.safeLevel) {
+        if (item.destroyed) return Promise.resolve();
+        if (useTarget) {
+          if (item.level >= selectedTarget) return Promise.resolve();
+          if (item.level < item.safeLevel && selectedTarget >= item.safeLevel) {
+            return Promise.resolve();
+          }
+        } else if (item.level < item.safeLevel) {
           return Promise.resolve();
         }
 
@@ -244,7 +273,7 @@
 
     async function enhanceAllSteps() {
       while (entries.some(it => !it.destroyed && it.level < selectedTarget)) {
-        await enhanceOnce();
+        await enhanceOnce(false, true);
         await new Promise(r => requestAnimationFrame(r));
       }
     }
