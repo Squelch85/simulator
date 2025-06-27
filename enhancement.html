@@ -65,11 +65,7 @@
 <body>
   <div class="theme-toggle"><button id="toggleTheme" class="theme-btn">🌙</button></div>
   <h1>아이템 강화 시뮬레이터</h1>
-  <div class="controls">
-    <button onclick="registerItem('무기', 6)">무기 등록</button>
-    <button onclick="registerItem('방어구', 1)">방어구 등록</button>
-    <button onclick="resetAll()">초기화</button>
-  </div>
+  <div class="controls" id="reg-controls"></div>
   <div id="enhance-bar"></div>
   <div id="entry-grid"></div>
   <p class="guide">목표 단계(강화 바)를 선택 후 실행하세요</p>
@@ -89,6 +85,21 @@
       slot.className = 'slot';
       entryGrid.appendChild(slot);
     }
+
+    // 등록 버튼 동적 생성
+    const regControls = document.getElementById('reg-controls');
+    Object.entries(window.enhanceRates).forEach(([type, map]) => {
+      Object.keys(map).forEach(safe => {
+        const btn = document.createElement('button');
+        btn.textContent = `${type}(${safe}안전) 등록`;
+        btn.onclick = () => registerItem(type, parseInt(safe));
+        regControls.appendChild(btn);
+      });
+    });
+    const resetBtn = document.createElement('button');
+    resetBtn.textContent = '초기화';
+    resetBtn.onclick = resetAll;
+    regControls.appendChild(resetBtn);
 
     // 2) 상단 강화바 생성 & 클릭 핸들러
     let selectedTarget = 1;
