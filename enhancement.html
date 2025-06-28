@@ -49,7 +49,6 @@
       grid-template-columns: repeat(7, 1fr);
       gap: 4px;
     }
-    #scrollSelect { grid-column: 1 / -1; padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); color: var(--text-color); }
     #reg-controls button { width: 100%; }
     .reset-row { grid-column: 1 / -1; display: flex; justify-content: center; gap: 4px; }
     .controls button { padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 0.8rem; }
@@ -122,7 +121,6 @@
   <div class="theme-toggle"><button id="toggleTheme" class="theme-btn">🌙</button></div>
   <h1>아이템 강화 시뮬레이터</h1>
   <div class="controls">
-    <select id="scrollSelect"></select>
     <div id="reg-controls"></div>
     <div class="reset-row">
       <button id="resetBtn">초기화</button>
@@ -135,6 +133,7 @@
   <div class="run-controls">
     <button onclick="decreaseAll()">-1</button>
     <button onclick="enhanceOnce()">+1</button>
+    <button id="harkiniBtn" onclick="enhanceHarkiniOnce()" disabled>하르키니</button>
     <button onclick="enhanceOnce(true)">축복</button>
     <button onclick="enhanceAllSteps()">다중강화</button>
   </div>
@@ -151,31 +150,22 @@
     let lastSelectedId = null;
 
     function populateControls() {
-      const select = document.getElementById('scrollSelect');
-      select.innerHTML = '';
-      Object.keys(window.enhanceRates).forEach(sc => {
-        const opt = document.createElement('option');
-        opt.value = sc;
-        opt.textContent = sc;
-        select.appendChild(opt);
-      });
-      select.onchange = updateButtons;
       updateButtons();
     }
 
     function updateButtons() {
-      const scroll = document.getElementById('scrollSelect').value;
       const regControls = document.getElementById('reg-controls');
       regControls.innerHTML = '';
-      const types = Object.keys(window.enhanceRates[scroll]).sort();
+      const baseRates = window.enhanceRates['기본'];
+      const types = Object.keys(baseRates).sort();
       types.forEach(type => {
-        const levels = Object.keys(window.enhanceRates[scroll][type])
+        const levels = Object.keys(baseRates[type])
           .map(Number)
           .sort((a, b) => a - b);
         levels.forEach(safe => {
           const btn = document.createElement('button');
           btn.textContent = `${type} ${safe}안전`;
-          btn.onclick = () => registerItem(type, safe, scroll);
+          btn.onclick = () => registerItem(type, safe);
           regControls.appendChild(btn);
         });
       });
@@ -199,6 +189,7 @@
       document.getElementById('toggleTheme')
         .addEventListener('click', () =>
           document.documentElement.classList.toggle('dark'));
+      updateHarkiniButton();
     });
 
     // 2) 상단 강화바 생성 & 클릭 핸들러
@@ -217,13 +208,15 @@
         el.classList.toggle('safe',     level <= safeLevel);
         el.classList.toggle('break',    !!breakable);
       });
+      updateHarkiniButton();
     }
 
 
     // 3) 아이템 등록/렌더/리셋
-    function registerItem(type, safeLevel, scroll) {
-      if (entries.length && (entries[0].type !== type || entries[0].scroll !== scroll)) {
-        alert('동일한 스크롤과 유형만 등록 가능합니다.');
+    function registerItem(type, safeLevel) {
+      const scroll = '기본';
+      if (entries.length && entries[0].type !== type) {
+        alert('동일한 유형만 등록 가능합니다.');
         return;
       }
       if (entries.length >= 40) return;
@@ -295,6 +288,7 @@
           slot.appendChild(card);
         }
       });
+      updateHarkiniButton();
     }
     function resetAll() {
       entries.length = 0;
@@ -381,6 +375,46 @@
       });
     }
 
+    function canUseHarkini() {
+      const first = entries[0];
+      return !!window.enhanceRates['하르키니']?.[first?.type]?.[first?.safeLevel]?.[String(first?.level)];
+    }
+
+    function updateHarkiniButton() {
+      const btn = document.getElementById('harkiniBtn');
+      if (btn) btn.disabled = !canUseHarkini();
+    }
+
+    async function enhanceHarkiniOnce() {
+      const targets = selectedEntries();
+      renderEntries();
+
+      const promises = targets.map(item => {
+        if (item.destroyed) return Promise.resolve();
+        const result = getEnhanceResult({ ...item, scroll: '하르키니' });
+        item.destroyed = result.destroyed;
+        const card = document.querySelector(`.card[data-id="${item.id}"]`);
+        if (result.success) {
+          item.level += result.increment;
+          return waitForAnim(card, 'success');
+        } else if (result.destroyed) {
+          return waitForAnim(card, 'fail');
+        } else if (result.increment < 0) {
+          item.level = Math.max(0, item.level + result.increment);
+          return waitForAnim(card, 'fail');
+        }
+        return Promise.resolve();
+      });
+
+      await Promise.all(promises);
+
+      for (let i = entries.length - 1; i >= 0; i--) {
+        if (entries[i].destroyed) entries.splice(i, 1);
+      }
+      renderEntries();
+      updateStepBar();
+    }
+
     async function enhanceOnce(bless = false, useTarget = false) {
         const targets = selectedEntries();
         if (useTarget) {
@@ -432,6 +466,6 @@
       }
     }
   </script>
-  <footer><small>버전 v1.0.0</small></footer>
+  <footer><small>버전 v1.1.0</small></footer>
 </body>
 </html>
