@@ -104,8 +104,9 @@
     .card.type-그로아-장비 .img { background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc1MCc+4pqZPC90ZXh0Pjwvc3ZnPg=='); }
     .card.type-장신구 .img { background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc1MCc+8J+SjTwvdGV4dD48L3N2Zz4='); }
     .card.type-컬렉션-전용-아이템 .img { background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc1MCc+8J+TpjwvdGV4dD48L3N2Zz4='); }
-    .success { animation: successFlash 0.5s; }
-    .fail { animation: failFlash 0.5s; }
+    .success { animation: successFlash 0.6s; }
+    .fail { animation: failFlash 0.6s; }
+    .maintain { animation: maintainFlash 0.6s; }
     .guide { margin: 4px 0; font-size: 0.9rem; color: var(--text-color); }
     .run-controls { display: flex; gap: 4px; justify-content: center; margin-bottom: 8px; }
     .run-controls button { flex:1; padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 1rem; }
@@ -113,8 +114,21 @@
     .select-controls { display: flex; gap: 4px; justify-content: center; margin-bottom: 8px; }
     .select-controls button { flex:1; padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 1rem; }
     .select-controls button:hover { background: var(--control-hover); }
-    @keyframes successFlash { from { background: green; } to { background: inherit; } }
-    @keyframes failFlash { from { background: red; } to { background: inherit; } }
+    @keyframes successFlash {
+      0% { background: var(--safe-color); transform: scale(1); box-shadow: 0 0 0 0 var(--safe-color); }
+      50% { background: var(--safe-color); transform: scale(1.05); box-shadow: 0 0 8px 4px var(--safe-color); }
+      100% { background: inherit; transform: scale(1); box-shadow: none; }
+    }
+    @keyframes failFlash {
+      0% { background: var(--break-color); transform: scale(1); box-shadow: 0 0 0 0 var(--break-color); }
+      50% { background: var(--break-color); transform: scale(0.95); box-shadow: 0 0 8px 4px var(--break-color); }
+      100% { background: inherit; transform: scale(1); box-shadow: none; }
+    }
+    @keyframes maintainFlash {
+      0% { background: var(--target-color); transform: scale(1); box-shadow: 0 0 0 0 var(--target-color); }
+      50% { background: var(--target-color); transform: scale(1.02); box-shadow: 0 0 6px 3px var(--target-color); }
+      100% { background: inherit; transform: scale(1); box-shadow: none; }
+    }
   </style>
 </head>
 <body>
@@ -403,7 +417,7 @@
           item.level = Math.max(0, item.level + result.increment);
           return waitForAnim(card, 'fail');
         }
-        return Promise.resolve();
+        return waitForAnim(card, 'maintain');
       });
 
       await Promise.all(promises);
@@ -447,7 +461,7 @@
           item.level = Math.max(0, item.level + result.increment);
           return waitForAnim(card, 'fail');
         }
-        return Promise.resolve();
+        return waitForAnim(card, 'maintain');
       });
 
       await Promise.all(promises);
@@ -466,6 +480,6 @@
       }
     }
   </script>
-  <footer><small>버전 v1.1.0</small></footer>
+  <footer><small>버전 v1.2.0</small></footer>
 </body>
 </html>
