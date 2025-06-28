@@ -370,6 +370,15 @@
       function getEnhanceResult(item, bless) {
         const rates = window.enhanceRates[item.scroll]?.[item.type]?.[item.safeLevel]?.[String(item.level)];
         if (!rates) return { success:false, destroyed:false, increment:0 };
+        if (item.scroll === '하르키니' && !bless) {
+          let r = Math.random();
+          if (r < rates.base) return { success:true, destroyed:false, increment:1 };
+          r -= rates.base;
+          if (r < (rates.break||0)) return { success:true, destroyed:false, increment:2 };
+          r -= (rates.break||0);
+          if (r < (rates.drop||0)) return { success:false, destroyed:false, increment:-1 };
+          return { success:false, destroyed:false, increment:0 };
+        }
         if (bless) {
           const r = Math.random();
           let sum = 0;
@@ -509,6 +518,6 @@
       }
     }
   </script>
-  <footer><small>버전 v1.3.0</small></footer>
+  <footer><small>버전 v1.3.1</small></footer>
 </body>
 </html>
