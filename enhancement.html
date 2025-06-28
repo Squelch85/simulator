@@ -60,7 +60,7 @@
     .step.safe { background: var(--safe-color); }
     .step.break { background: var(--break-color); }
     #entry-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 4px; margin-bottom: 8px; justify-items: center; }
-    .slot { width: 100%; max-width: 70px; aspect-ratio: 1 / 1; border: 1px solid var(--border-color); background: var(--container-bg); display: flex; align-items: center; justify-content: center; }
+    .slot { position: relative; width: 100%; max-width: 70px; aspect-ratio: 1 / 1; border: 1px solid var(--border-color); background: var(--container-bg); display: flex; align-items: center; justify-content: center; overflow: visible; }
     .card {
       position: relative;
       font-weight: bold;
@@ -129,6 +129,15 @@
       50% { background: var(--target-color); transform: scale(1.02); box-shadow: 0 0 6px 3px var(--target-color); }
       100% { background: inherit; transform: scale(1); box-shadow: none; }
     }
+    .shard { position:absolute; inset:0; pointer-events:none; }
+    .shard.sh1 { clip-path: polygon(0 0,50% 0,50% 50%,0 50%); animation: shard1 0.6s forwards; }
+    .shard.sh2 { clip-path: polygon(50% 0,100% 0,100% 50%,50% 50%); animation: shard2 0.6s forwards; }
+    .shard.sh3 { clip-path: polygon(0 50%,50% 50%,50% 100%,0 100%); animation: shard3 0.6s forwards; }
+    .shard.sh4 { clip-path: polygon(50% 50%,100% 50%,100% 100%,50% 100%); animation: shard4 0.6s forwards; }
+    @keyframes shard1 { to { transform: translate(-30px,-30px) rotate(-25deg); opacity:0; } }
+    @keyframes shard2 { to { transform: translate(30px,-30px) rotate(25deg); opacity:0; } }
+    @keyframes shard3 { to { transform: translate(-30px,30px) rotate(20deg); opacity:0; } }
+    @keyframes shard4 { to { transform: translate(30px,30px) rotate(-20deg); opacity:0; } }
   </style>
 </head>
 <body>
@@ -286,6 +295,8 @@
 
           const img = document.createElement('div');
           img.className = 'img';
+          const custom = localStorage.getItem('itemImage-' + item.type);
+          if (custom) img.style.backgroundImage = `url(${custom})`;
           card.appendChild(img);
 
           const name = document.createElement('div');
@@ -389,6 +400,24 @@
       });
     }
 
+    function shatterCard(card) {
+      return new Promise(res => {
+        const parent = card.parentElement;
+        const html = card.innerHTML;
+        ['sh1','sh2','sh3','sh4'].forEach(cls => {
+          const frag = document.createElement('div');
+          frag.className = 'shard ' + cls;
+          frag.innerHTML = html;
+          parent.appendChild(frag);
+        });
+        card.style.visibility = 'hidden';
+        parent.querySelector('.shard.sh4').addEventListener('animationend', () => {
+          parent.querySelectorAll('.shard').forEach(s => s.remove());
+          res();
+        }, { once: true });
+      });
+    }
+
     function canUseHarkini() {
       const first = entries[0];
       return !!window.enhanceRates['하르키니']?.[first?.type]?.[first?.safeLevel]?.[String(first?.level)];
@@ -412,7 +441,7 @@
           item.level += result.increment;
           return waitForAnim(card, 'success');
         } else if (result.destroyed) {
-          return waitForAnim(card, 'fail');
+          return shatterCard(card);
         } else if (result.increment < 0) {
           item.level = Math.max(0, item.level + result.increment);
           return waitForAnim(card, 'fail');
@@ -456,7 +485,7 @@
           item.level += result.increment;
           return waitForAnim(card, 'success');
         } else if (result.destroyed) {
-          return waitForAnim(card, 'fail');
+          return shatterCard(card);
         } else if (result.increment < 0) {
           item.level = Math.max(0, item.level + result.increment);
           return waitForAnim(card, 'fail');
@@ -480,6 +509,6 @@
       }
     }
   </script>
-  <footer><small>버전 v1.2.0</small></footer>
+  <footer><small>버전 v1.3.0</small></footer>
 </body>
 </html>

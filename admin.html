@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-store">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>이미지 관리 도구</title>
+  <style>
+    :root {
+      --bg-color: #f4f4f4;
+      --text-color: #000000;
+      --container-bg: #ffffff;
+      --border-color: #dddddd;
+      --control-bg: #eeeeee;
+      --control-hover: #dddddd;
+      --shadow: rgba(0,0,0,0.1);
+    }
+    html.dark {
+      --bg-color: #121212;
+      --text-color: #e0e0e0;
+      --container-bg: #1e1e1e;
+      --border-color: #333333;
+      --control-bg: #2c2c2c;
+      --control-hover: #3a3a3a;
+      --shadow: rgba(0,0,0,0.5);
+    }
+    body { margin:0; padding:16px; font-family:sans-serif; background:var(--bg-color); color:var(--text-color); text-align:center; transition:background-color .3s, color .3s; }
+    .home-link { position:fixed; top:8px; left:8px; color:var(--text-color); text-decoration:none; font-weight:bold; }
+    .theme-toggle { position:fixed; top:8px; right:8px; }
+    .theme-toggle button { background:none; border:none; font-size:1.5rem; color:var(--text-color); cursor:pointer; }
+    .controls { display:flex; flex-wrap:wrap; gap:4px; justify-content:center; margin-bottom:8px; }
+    .controls select, .controls input, .controls button { padding:4px; font-size:1rem; background:var(--control-bg); border:1px solid var(--border-color); border-radius:4px; color:var(--text-color); }
+    .controls button:hover { background:var(--control-hover); }
+    .slot { position:relative; width:100px; height:100px; margin:0 auto 8px; background:var(--container-bg); border:1px solid var(--border-color); display:flex; align-items:center; justify-content:center; overflow:visible; }
+    .card { position:relative; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:bold; font-size:0.8rem; }
+    .card .img { width:32px; height:32px; margin:0 auto 2px; background-size:contain; background-repeat:no-repeat; }
+    .card .name { font-size:0.7rem; }
+    .card .level { font-size:0.8rem; }
+    .card.type-무기 .img { background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc1MCc+8J+XoTwvdGV4dD48L3N2Zz4='); }
+    .card.type-방어구 .img { background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc1MCc+8J+boTwvdGV4dD48L3N2Zz4='); }
+    .card.type-그로아-장비 .img { background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc1MCc+4pqZPC90ZXh0Pjwvc3ZnPg=='); }
+    .card.type-장신구 .img { background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc1MCc+8J+SjTwvdGV4dD48L3N2Zz4='); }
+    .card.type-컬렉션-전용-아이템 .img { background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc1MCc+8J+TpjwvdGV4dD48L3N2Zz4='); }
+    .shard { position:absolute; inset:0; pointer-events:none; }
+    .shard.sh1 { clip-path:polygon(0 0,50% 0,50% 50%,0 50%); animation:shard1 .6s forwards; }
+    .shard.sh2 { clip-path:polygon(50% 0,100% 0,100% 50%,50% 50%); animation:shard2 .6s forwards; }
+    .shard.sh3 { clip-path:polygon(0 50%,50% 50%,50% 100%,0 100%); animation:shard3 .6s forwards; }
+    .shard.sh4 { clip-path:polygon(50% 50%,100% 50%,100% 100%,50% 100%); animation:shard4 .6s forwards; }
+    @keyframes shard1 { to { transform:translate(-30px,-30px) rotate(-25deg); opacity:0; } }
+    @keyframes shard2 { to { transform:translate(30px,-30px) rotate(25deg); opacity:0; } }
+    @keyframes shard3 { to { transform:translate(-30px,30px) rotate(20deg); opacity:0; } }
+    @keyframes shard4 { to { transform:translate(30px,30px) rotate(-20deg); opacity:0; } }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="home-link">🏠</a>
+  <div class="theme-toggle"><button id="themeBtn">🌙</button></div>
+  <h1>아이템 이미지 관리</h1>
+  <div class="controls">
+    <select id="typeSelect"></select>
+    <input type="file" id="imgInput" accept="image/*">
+    <button id="saveBtn">저장</button>
+    <button id="delBtn">삭제</button>
+  </div>
+  <div class="slot">
+    <div class="card">
+      <div class="img"></div>
+      <div class="name"></div>
+      <div class="level">+0</div>
+    </div>
+  </div>
+  <button id="testBtn">파괴 효과 테스트</button>
+  <footer><small>버전 v1.3.0</small></footer>
+  <script>
+    const types = ['무기','방어구','그로아-장비','장신구','컬렉션-전용-아이템'];
+    const select = document.getElementById('typeSelect');
+    const imgDiv = document.querySelector('.card .img');
+    const nameDiv = document.querySelector('.card .name');
+    let currentData;
+    types.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t;
+      opt.textContent = t;
+      select.appendChild(opt);
+    });
+    function load(){
+      const type = select.value;
+      const stored = localStorage.getItem('itemImage-'+type);
+      const card = document.querySelector('.card');
+      card.className = 'card type-'+type.replace(/\s+/g,'-');
+      if(stored){
+        imgDiv.style.backgroundImage = `url(${stored})`;
+      }else{
+        imgDiv.style.backgroundImage = '';
+      }
+      nameDiv.textContent = type;
+    }
+    select.addEventListener('change', load);
+    document.getElementById('imgInput').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        currentData = ev.target.result;
+        imgDiv.style.backgroundImage = `url(${currentData})`;
+      };
+      reader.readAsDataURL(file);
+    });
+    document.getElementById('saveBtn').addEventListener('click', () => {
+      if(currentData){
+        localStorage.setItem('itemImage-'+select.value, currentData);
+        alert('저장되었습니다');
+      }
+    });
+    document.getElementById('delBtn').addEventListener('click', () => {
+      localStorage.removeItem('itemImage-'+select.value);
+      load();
+    });
+    function shatterCard(card){
+      return new Promise(res=>{
+        const parent = card.parentElement;
+        const html = card.innerHTML;
+        ['sh1','sh2','sh3','sh4'].forEach(cls=>{
+          const f=document.createElement('div');
+          f.className='shard '+cls;
+          f.innerHTML=html;
+          parent.appendChild(f);
+        });
+        card.style.visibility='hidden';
+        parent.querySelector('.shard.sh4').addEventListener('animationend',()=>{
+          parent.querySelectorAll('.shard').forEach(s=>s.remove());
+          card.style.visibility='visible';
+          res();
+        },{once:true});
+      });
+    }
+    document.getElementById('testBtn').addEventListener('click',()=>{
+      const card=document.querySelector('.card');
+      shatterCard(card);
+    });
+    document.getElementById('themeBtn').addEventListener('click',()=>document.documentElement.classList.toggle('dark'));
+    load();
+  </script>
+</body>
+</html>
