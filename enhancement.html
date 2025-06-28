@@ -40,6 +40,7 @@
     }
     .theme-toggle { position: absolute; top: 10px; right: 10px; }
     .theme-btn { background: none; border: none; font-size: 1.5rem; filter: grayscale(100%); cursor: pointer; transition: filter .3s; color: var(--text-color); }
+    footer { text-align:center; font-size:0.8rem; color: var(--text-color); margin-top:8px; }
     .theme-btn:hover { filter: grayscale(0%); }
     .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 4px; margin-bottom: 8px; }
     #reg-controls {
@@ -48,6 +49,7 @@
       grid-template-columns: repeat(7, 1fr);
       gap: 4px;
     }
+    #scrollSelect { grid-column: 1 / -1; padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); color: var(--text-color); }
     #reg-controls button { width: 100%; }
     .reset-row { grid-column: 1 / -1; display: flex; justify-content: center; gap: 4px; }
     .controls button { padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 0.8rem; }
@@ -120,6 +122,7 @@
   <div class="theme-toggle"><button id="toggleTheme" class="theme-btn">🌙</button></div>
   <h1>아이템 강화 시뮬레이터</h1>
   <div class="controls">
+    <select id="scrollSelect"></select>
     <div id="reg-controls"></div>
     <div class="reset-row">
       <button id="resetBtn">초기화</button>
@@ -148,17 +151,31 @@
     let lastSelectedId = null;
 
     function populateControls() {
+      const select = document.getElementById('scrollSelect');
+      select.innerHTML = '';
+      Object.keys(window.enhanceRates).forEach(sc => {
+        const opt = document.createElement('option');
+        opt.value = sc;
+        opt.textContent = sc;
+        select.appendChild(opt);
+      });
+      select.onchange = updateButtons;
+      updateButtons();
+    }
+
+    function updateButtons() {
+      const scroll = document.getElementById('scrollSelect').value;
       const regControls = document.getElementById('reg-controls');
       regControls.innerHTML = '';
-      const types = Object.keys(window.enhanceRates).sort();
+      const types = Object.keys(window.enhanceRates[scroll]).sort();
       types.forEach(type => {
-        const levels = Object.keys(window.enhanceRates[type])
+        const levels = Object.keys(window.enhanceRates[scroll][type])
           .map(Number)
           .sort((a, b) => a - b);
         levels.forEach(safe => {
           const btn = document.createElement('button');
           btn.textContent = `${type} ${safe}안전`;
-          btn.onclick = () => registerItem(type, safe);
+          btn.onclick = () => registerItem(type, safe, scroll);
           regControls.appendChild(btn);
         });
       });
@@ -192,7 +209,7 @@
     function updateStepBar() {
       const item = entries[0];
       const safeLevel = item?.safeLevel || 0;
-      const rateTable = item ? window.enhanceRates[item.type]?.[item.safeLevel] : null;
+      const rateTable = item ? window.enhanceRates[item.scroll]?.[item.type]?.[item.safeLevel] : null;
       document.querySelectorAll('.step').forEach((el, i) => {
         const level = i + 1;
         const breakable = rateTable?.[String(level - 1)]?.break;
@@ -204,9 +221,9 @@
 
 
     // 3) 아이템 등록/렌더/리셋
-    function registerItem(type, safeLevel) {
-      if (entries.length && entries[0].type !== type) {
-        alert('동일한 유형만 등록 가능합니다.');
+    function registerItem(type, safeLevel, scroll) {
+      if (entries.length && (entries[0].type !== type || entries[0].scroll !== scroll)) {
+        alert('동일한 스크롤과 유형만 등록 가능합니다.');
         return;
       }
       if (entries.length >= 40) return;
@@ -215,6 +232,7 @@
         type,
         level: 0,
         safeLevel,
+        scroll,
         destroyed: false,
         selected: false
       });
@@ -287,13 +305,14 @@
 
     function fillMax() {
       if (!entries.length) return;
-      const { type, safeLevel } = entries[0];
+      const { type, safeLevel, scroll } = entries[0];
       while (entries.length < 40) {
         entries.push({
           id: Date.now() + Math.random(),
           type,
           level: 0,
           safeLevel,
+          scroll,
           destroyed: false,
           selected: false
         });
@@ -329,25 +348,28 @@
 
     // 4) 확률표는 enhance_rates.js에서 로드
 
-    function getEnhanceResult(item, bless) {
-      const rates = window.enhanceRates[item.type]?.[item.safeLevel]?.[String(item.level)];
-      if (!rates) return { success:false, destroyed:false, increment:0 };
-      if (bless) {
-        const r = Math.random();
-        let sum = 0;
-        for (let i = 0; i < rates.bless.length; i++) {
-          sum += rates.bless[i];
-          if (r < sum) {
-            return { success:true, destroyed:false, increment:i + 1 };
+      function getEnhanceResult(item, bless) {
+        const rates = window.enhanceRates[item.scroll]?.[item.type]?.[item.safeLevel]?.[String(item.level)];
+        if (!rates) return { success:false, destroyed:false, increment:0 };
+        if (bless) {
+          const r = Math.random();
+          let sum = 0;
+          for (let i = 0; i < rates.bless.length; i++) {
+            sum += rates.bless[i];
+            if (r < sum) {
+              return { success:true, destroyed:false, increment:i + 1 };
+            }
           }
+          return { success:false, destroyed:Math.random() < (rates.break||0), increment:0 };
         }
-        return { success:false, destroyed:rates.break, increment:0 };
+        let r = Math.random();
+        if (r < rates.base) return { success:true, destroyed:false, increment:1 };
+        r -= rates.base;
+        if (r < (rates.break||0)) return { success:false, destroyed:true, increment:0 };
+        r -= (rates.break||0);
+        if (r < (rates.drop||0)) return { success:false, destroyed:false, increment:-1 };
+        return { success:false, destroyed:false, increment:0 };
       }
-      const success = Math.random() < rates.base;
-      return success
-        ? { success:true, destroyed:false, increment:1 }
-        : { success:false, destroyed:rates.break, increment:0 };
-    }
 
     function waitForAnim(card, cls) {
       return new Promise(res => {
@@ -387,6 +409,9 @@
           return waitForAnim(card, 'success');
         } else if (result.destroyed) {
           return waitForAnim(card, 'fail');
+        } else if (result.increment < 0) {
+          item.level = Math.max(0, item.level + result.increment);
+          return waitForAnim(card, 'fail');
         }
         return Promise.resolve();
       });
@@ -407,5 +432,6 @@
       }
     }
   </script>
+  <footer><small>버전 v1.0.0</small></footer>
 </body>
 </html>
