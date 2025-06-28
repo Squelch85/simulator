@@ -43,6 +43,11 @@
     .card.type-그로아-장비 .img { background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc1MCc+4pqZPC90ZXh0Pjwvc3ZnPg=='); }
     .card.type-장신구 .img { background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc1MCc+8J+SjTwvdGV4dD48L3N2Zz4='); }
     .card.type-컬렉션-전용-아이템 .img { background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+PHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc1MCc+8J+TpjwvdGV4dD48L3N2Zz4='); }
+    #accountSection { margin-bottom:8px; }
+    .acct-list { list-style:none; padding:0; margin:4px 0; }
+    .acct-list li { display:flex; gap:4px; justify-content:center; align-items:center; margin-bottom:4px; }
+    .acct-list button { padding:2px 4px; font-size:0.9rem; background:var(--control-bg); border:1px solid var(--border-color); border-radius:4px; color:var(--text-color); }
+    .acct-list button:hover { background:var(--control-hover); }
     .shard { position:absolute; inset:0; pointer-events:none; }
     .shard.sh1 { clip-path:polygon(0 0,50% 0,50% 50%,0 50%); animation:shard1 .6s forwards; }
     .shard.sh2 { clip-path:polygon(50% 0,100% 0,100% 50%,50% 50%); animation:shard2 .6s forwards; }
@@ -58,6 +63,18 @@
   <a href="index.html" class="home-link">🏠</a>
   <div class="theme-toggle"><button id="themeBtn">🌙</button></div>
   <h1>아이템 이미지 관리</h1>
+  <div class="controls" id="authBox">
+    <input type="password" id="adminPwd" placeholder="관리자 비밀번호">
+    <button id="authBtn">확인</button>
+  </div>
+  <div id="accountSection" style="display:none;">
+    <div class="controls">
+      <input type="text" id="accId" placeholder="계정 ID">
+      <input type="password" id="accPw" placeholder="비밀번호">
+      <button id="addBtn">추가</button>
+    </div>
+    <ul id="accountList" class="acct-list"></ul>
+  </div>
   <div class="controls">
     <select id="typeSelect"></select>
     <input type="file" id="imgInput" accept="image/*">
@@ -72,7 +89,7 @@
     </div>
   </div>
   <button id="testBtn">파괴 효과 테스트</button>
-  <footer><small>버전 v1.3.1</small></footer>
+  <footer><small>버전 v1.3.2</small></footer>
   <script>
     const types = ['무기','방어구','그로아-장비','장신구','컬렉션-전용-아이템'];
     const select = document.getElementById('typeSelect');
@@ -139,6 +156,46 @@
     document.getElementById('testBtn').addEventListener('click',()=>{
       const card=document.querySelector('.card');
       shatterCard(card);
+    });
+    function loadAccounts(){
+      const list = JSON.parse(localStorage.getItem('accounts')||'[]');
+      const ul = document.getElementById('accountList');
+      ul.innerHTML = '';
+      list.forEach((acc,idx)=>{
+        const li=document.createElement('li');
+        li.textContent=acc.id;
+        const btn=document.createElement('button');
+        btn.textContent='삭제';
+        btn.addEventListener('click',()=>{
+          list.splice(idx,1);
+          localStorage.setItem('accounts',JSON.stringify(list));
+          loadAccounts();
+        });
+        li.appendChild(btn);
+        ul.appendChild(li);
+      });
+    }
+    document.getElementById('addBtn').addEventListener('click',()=>{
+      const id=document.getElementById('accId').value.trim();
+      const pw=document.getElementById('accPw').value;
+      if(!id||!pw) return;
+      const list=JSON.parse(localStorage.getItem('accounts')||'[]');
+      list.push({id,pw});
+      localStorage.setItem('accounts',JSON.stringify(list));
+      document.getElementById('accId').value='';
+      document.getElementById('accPw').value='';
+      loadAccounts();
+    });
+    document.getElementById('authBtn').addEventListener('click',()=>{
+      const pwd=document.getElementById('adminPwd').value;
+      const key=localStorage.getItem('adminPwd')||'admin123';
+      if(pwd===key){
+        document.getElementById('accountSection').style.display='block';
+        document.getElementById('authBox').style.display='none';
+        loadAccounts();
+      }else{
+        alert('비밀번호가 틀렸습니다');
+      }
     });
     document.getElementById('themeBtn').addEventListener('click',()=>document.documentElement.classList.toggle('dark'));
     load();
