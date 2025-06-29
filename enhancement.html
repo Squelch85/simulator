@@ -91,19 +91,29 @@
       to { transform: rotate(1turn); }
     }
     .card .img {
-      width: 32px;
-      height: 32px;
-      margin: 0 auto 2px;
-      background-size: contain;
-      background-repeat: no-repeat;
+      width: 90%;
+      height: 90%;
+      margin: auto;
+      object-fit: contain;
+      flex: 1;
     }
-    .card .name { font-size: 0.7rem; }
-    .card .level { font-size: 0.8rem; }
-    .card.type-무기 .img { background-image: url('img/weapon.svg'); }
-    .card.type-방어구 .img { background-image: url('img/armor.svg'); }
-    .card.type-그로아-장비 .img { background-image: url('img/groa.svg'); }
-    .card.type-장신구 .img { background-image: url('img/accessory.svg'); }
-    .card.type-컬렉션-전용-아이템 .img { background-image: url('img/collection.svg'); }
+    .card .name { display:none; font-size: 0.7rem; }
+    .card.selected .name { display:block; }
+    .card .level {
+      position:absolute;
+      bottom:2px;
+      right:2px;
+      font-size: 0.8rem;
+    }
+    /* 각 아이템 유형별 GIF 이미지는 스크립트에서 src 속성으로 지정 */
+    .shatter-overlay {
+      position:absolute;
+      inset:0;
+      background:url('img/shatter.gif') center/cover no-repeat;
+      pointer-events:none;
+      animation: shatterFade 0.6s forwards;
+    }
+    @keyframes shatterFade { to { opacity:0; transform:scale(1.2); } }
     .success { animation: successFlash 0.6s; }
     .fail { animation: failFlash 0.6s; }
     .maintain { animation: maintainFlash 0.6s; }
@@ -129,15 +139,6 @@
       50% { background: var(--target-color); transform: scale(1.02); box-shadow: 0 0 6px 3px var(--target-color); }
       100% { background: inherit; transform: scale(1); box-shadow: none; }
     }
-    .shard { position:absolute; inset:0; pointer-events:none; }
-    .shard.sh1 { clip-path: polygon(0 0,50% 0,50% 50%,0 50%); animation: shard1 0.6s forwards; }
-    .shard.sh2 { clip-path: polygon(50% 0,100% 0,100% 50%,50% 50%); animation: shard2 0.6s forwards; }
-    .shard.sh3 { clip-path: polygon(0 50%,50% 50%,50% 100%,0 100%); animation: shard3 0.6s forwards; }
-    .shard.sh4 { clip-path: polygon(50% 50%,100% 50%,100% 100%,50% 100%); animation: shard4 0.6s forwards; }
-    @keyframes shard1 { to { transform: translate(-30px,-30px) rotate(-25deg); opacity:0; } }
-    @keyframes shard2 { to { transform: translate(30px,-30px) rotate(25deg); opacity:0; } }
-    @keyframes shard3 { to { transform: translate(-30px,30px) rotate(20deg); opacity:0; } }
-    @keyframes shard4 { to { transform: translate(30px,30px) rotate(-20deg); opacity:0; } }
   </style>
 </head>
 <body>
@@ -260,6 +261,23 @@
       return 'type-' + type.replace(/\s+/g, '-');
     }
 
+    function imagePath(type) {
+      switch (type) {
+        case '무기':
+          return 'img/weapon.gif';
+        case '방어구':
+          return 'img/armor.gif';
+        case '그로아 장비':
+          return 'img/groa.gif';
+        case '장신구':
+          return 'img/accessory.gif';
+        case '컬렉션 전용 아이템':
+          return 'img/collection.gif';
+        default:
+          return '';
+      }
+    }
+
     function levelColor(lv) {
       const hue = 120 - Math.min(lv, 20) * 6;
       return `hsl(${hue}, 80%, 60%)`;
@@ -294,8 +312,10 @@
           card.dataset.id = item.id;
           card.onclick = () => toggleSelect(item.id);
 
-          const img = document.createElement('div');
+          const img = document.createElement('img');
           img.className = 'img';
+          img.alt = item.type;
+          img.src = imagePath(item.type);
           card.appendChild(img);
 
           const name = document.createElement('div');
@@ -410,17 +430,11 @@
 
     function shatterCard(card) {
       return new Promise(res => {
-        const parent = card.parentElement;
-        const html = card.innerHTML;
-        ['sh1','sh2','sh3','sh4'].forEach(cls => {
-          const frag = document.createElement('div');
-          frag.className = 'shard ' + cls;
-          frag.innerHTML = html;
-          parent.appendChild(frag);
-        });
-        card.style.visibility = 'hidden';
-        parent.querySelector('.shard.sh4').addEventListener('animationend', () => {
-          parent.querySelectorAll('.shard').forEach(s => s.remove());
+        const overlay = document.createElement('div');
+        overlay.className = 'shatter-overlay';
+        card.appendChild(overlay);
+        overlay.addEventListener('animationend', () => {
+          overlay.remove();
           res();
         }, { once: true });
       });
@@ -518,6 +532,6 @@
   }
 
   </script>
-  <footer><small>버전 v1.3.4</small></footer>
+  <footer><small>버전 v1.3.6</small></footer>
 </body>
 </html>
