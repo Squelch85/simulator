@@ -173,6 +173,13 @@
   <script src="enhance_rates.js" defer></script>
   <script>
     const entries = [];
+    const typeImages = {
+      '무기': 'img/weapon.gif',
+      '방어구': 'img/armor.gif',
+      '그로아 장비': 'img/groa.gif',
+      '장신구': 'img/accessory.gif',
+      '컬렉션 전용 아이템': 'img/collection.gif'
+    };
     let entryGrid;
     let selectedTarget = 1;
     let lastSelectedId = null;
@@ -302,6 +309,7 @@
           const img = document.createElement('img');
           img.className = 'img';
           img.alt = item.type;
+          img.src = typeImages[item.type] || '';
           card.appendChild(img);
 
           const name = document.createElement('div');
@@ -518,6 +526,6 @@
   }
 
   </script>
-  <footer><small>버전 v1.3.5</small></footer>
+  <footer><small>버전 v1.3.6</small></footer>
 </body>
 </html>
