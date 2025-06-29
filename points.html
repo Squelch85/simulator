@@ -79,7 +79,9 @@
     <div class="total">총 사용 포인트: <span id="total-point">0</span></div>
     <button class="reset-button" onclick="resetAll()">전체 초기화</button>
   </div>
+<script src="versions.js"></script>
 <script>
+  applyVersion('points');
 const defaultMax = 2000;
 let MAX_TOTAL = defaultMax;
 const items = [
@@ -190,6 +192,6 @@ document.getElementById('themeBtn').addEventListener('click',toggleTheme);
 
 updateTotal();
 </script>
-  <footer><small>버전 v1.3.3</small></footer>
+  <footer><small id="version"></small></footer>
 </body>
 </html>

@@ -89,7 +89,9 @@
       <li><a href="enhancement.html">아이템 강화 시뮬</a></li>
     </ul>
   </nav>
+<script src="versions.js"></script>
   <script>
+  applyVersion('index');
     document.addEventListener('DOMContentLoaded', () => {
       const canvas = document.getElementById('titleCanvas');
       const ctx = canvas.getContext('2d');
@@ -230,6 +232,6 @@
     });
     document.getElementById('toggleTheme').addEventListener('click', () => document.documentElement.classList.toggle('dark'));
   </script>
-  <footer><small>버전 v1.3.3</small></footer>
+  <footer><small id="version"></small></footer>
 </body>
 </html>

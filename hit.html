@@ -96,7 +96,9 @@
     <strong>기초 회피력 슬라이더</strong>를 조정하여, 상황에 맞는 명중률을 참고용으로 확인해주세요.
   </div>
 
+<script src="versions.js"></script>
   <script>
+  applyVersion('hit');
     function calculateHitRate(atk, def, eva, k = 0.065) {
       const diff = atk - def - eva;
       const rate = 100 / (1 + Math.exp(-k * diff));
@@ -128,6 +130,6 @@
 
     window.onload = update;
   </script>
-  <footer><small>버전 v1.3.3</small></footer>
+  <footer><small id="version"></small></footer>
 </body>
 </html>
