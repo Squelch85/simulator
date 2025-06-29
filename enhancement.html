@@ -105,11 +105,7 @@
       right:2px;
       font-size: 0.8rem;
     }
-    .card.type-무기 .img { content:url('img/weapon.gif'); }
-    .card.type-방어구 .img { content:url('img/armor.gif'); }
-    .card.type-그로아-장비 .img { content:url('img/groa.gif'); }
-    .card.type-장신구 .img { content:url('img/accessory.gif'); }
-    .card.type-컬렉션-전용-아이템 .img { content:url('img/collection.gif'); }
+    /* 각 아이템 유형별 GIF 이미지는 스크립트에서 src 속성으로 지정 */
     .shatter-overlay {
       position:absolute;
       inset:0;
@@ -265,6 +261,23 @@
       return 'type-' + type.replace(/\s+/g, '-');
     }
 
+    function imagePath(type) {
+      switch (type) {
+        case '무기':
+          return 'img/weapon.gif';
+        case '방어구':
+          return 'img/armor.gif';
+        case '그로아 장비':
+          return 'img/groa.gif';
+        case '장신구':
+          return 'img/accessory.gif';
+        case '컬렉션 전용 아이템':
+          return 'img/collection.gif';
+        default:
+          return '';
+      }
+    }
+
     function levelColor(lv) {
       const hue = 120 - Math.min(lv, 20) * 6;
       return `hsl(${hue}, 80%, 60%)`;
@@ -302,6 +315,7 @@
           const img = document.createElement('img');
           img.className = 'img';
           img.alt = item.type;
+          img.src = imagePath(item.type);
           card.appendChild(img);
 
           const name = document.createElement('div');
@@ -518,6 +532,6 @@
   }
 
   </script>
-  <footer><small>버전 v1.3.5</small></footer>
+  <footer><small>버전 v1.3.6</small></footer>
 </body>
 </html>
