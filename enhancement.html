@@ -99,11 +99,11 @@
     }
     .card .name { font-size: 0.7rem; }
     .card .level { font-size: 0.8rem; }
-    .card.type-무기 .img { background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+CiAgPHJlY3Qgd2lkdGg9JzY0JyBoZWlnaHQ9JzY0JyBmaWxsPScjNDQ0Jy8+CiAgPHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc0MCc+8J+XoTwvdGV4dD4KPC9zdmc+Cg=='); }
-    .card.type-방어구 .img { background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+CiAgPHJlY3Qgd2lkdGg9JzY0JyBoZWlnaHQ9JzY0JyBmaWxsPScjNDQ0Jy8+CiAgPHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc0MCc+8J+boTwvdGV4dD4KPC9zdmc+Cg=='); }
-    .card.type-그로아-장비 .img { background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+CiAgPHJlY3Qgd2lkdGg9JzY0JyBoZWlnaHQ9JzY0JyBmaWxsPScjNDQ0Jy8+CiAgPHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc0MCc+8J+UpzwvdGV4dD4KPC9zdmc+Cg=='); }
-    .card.type-장신구 .img { background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+CiAgPHJlY3Qgd2lkdGg9JzY0JyBoZWlnaHQ9JzY0JyBmaWxsPScjNDQ0Jy8+CiAgPHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc0MCc+8J+SjTwvdGV4dD4KPC9zdmc+Cg=='); }
-    .card.type-컬렉션-전용-아이템 .img { background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCA2NCc+CiAgPHJlY3Qgd2lkdGg9JzY0JyBoZWlnaHQ9JzY0JyBmaWxsPScjNDQ0Jy8+CiAgPHRleHQgeD0nNTAlJyB5PSc1MCUnIGR5PScuMzVlbScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc0MCc+8J+TpjwvdGV4dD4KPC9zdmc+Cg=='); }
+    .card.type-무기 .img { background-image: url('img/weapon.svg'); }
+    .card.type-방어구 .img { background-image: url('img/armor.svg'); }
+    .card.type-그로아-장비 .img { background-image: url('img/groa.svg'); }
+    .card.type-장신구 .img { background-image: url('img/accessory.svg'); }
+    .card.type-컬렉션-전용-아이템 .img { background-image: url('img/collection.svg'); }
     .success { animation: successFlash 0.6s; }
     .fail { animation: failFlash 0.6s; }
     .maintain { animation: maintainFlash 0.6s; }
@@ -114,12 +114,6 @@
     .select-controls { display: flex; gap: 4px; justify-content: center; margin-bottom: 8px; }
     .select-controls button { flex:1; padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 1rem; }
     .select-controls button:hover { background: var(--control-hover); }
-    .img-upload { display: flex; gap: 4px; justify-content: center; margin-bottom: 8px; }
-    .img-upload select, .img-upload input, .img-upload button {
-      padding: 4px; background: var(--control-bg); border: 1px solid var(--border-color);
-      border-radius: 4px; color: var(--text-color); font-size: 0.9rem;
-    }
-    .img-upload button:hover { background: var(--control-hover); }
     @keyframes successFlash {
       0% { background: var(--safe-color); transform: scale(1); box-shadow: 0 0 0 0 var(--safe-color); }
       50% { background: var(--safe-color); transform: scale(1.05); box-shadow: 0 0 8px 4px var(--safe-color); }
@@ -169,12 +163,6 @@
   <div class="select-controls">
     <button onclick="selectSameLevel()">동일등급선택</button>
     <button onclick="deselectAll()">선택해제</button>
-  </div>
-  <div class="img-upload">
-    <select id="imgType"></select>
-    <input type="file" id="imgFile" accept="image/*">
-    <button id="imgSave">저장</button>
-    <button id="imgDel">삭제</button>
   </div>
 
   <script src="enhance_rates.js" defer></script>
@@ -226,14 +214,6 @@
           document.documentElement.classList.toggle('dark'));
       updateHarkiniButton();
 
-      const typeSelect = document.getElementById('imgType');
-      const imgTypes = ['무기','방어구','그로아-장비','장신구','컬렉션-전용-아이템'];
-      imgTypes.forEach(t => {
-        const opt = document.createElement('option');
-        opt.value = t;
-        opt.textContent = t;
-        typeSelect.appendChild(opt);
-      });
     });
 
     // 2) 상단 강화바 생성 & 클릭 핸들러
@@ -316,8 +296,6 @@
 
           const img = document.createElement('div');
           img.className = 'img';
-          const custom = localStorage.getItem('itemImage-' + item.type);
-          if (custom) img.style.backgroundImage = `url(${custom})`;
           card.appendChild(img);
 
           const name = document.createElement('div');
@@ -539,29 +517,7 @@
     }
   }
 
-  const imgInput = document.getElementById('imgFile');
-  const imgSave = document.getElementById('imgSave');
-  const imgDel = document.getElementById('imgDel');
-  const imgType = document.getElementById('imgType');
-  let imgData;
-  imgInput.addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => { imgData = ev.target.result; };
-    reader.readAsDataURL(file);
-  });
-  imgSave.addEventListener('click', () => {
-    if (!imgData) return;
-    localStorage.setItem('itemImage-' + imgType.value, imgData);
-    imgData = null;
-    alert('저장되었습니다');
-  });
-  imgDel.addEventListener('click', () => {
-    localStorage.removeItem('itemImage-' + imgType.value);
-    alert('삭제되었습니다');
-  });
   </script>
-  <footer><small>버전 v1.3.3</small></footer>
+  <footer><small>버전 v1.3.4</small></footer>
 </body>
 </html>
