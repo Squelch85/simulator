@@ -79,13 +79,14 @@
       inset: -2px;
       border-radius: 6px;
       border: 2px solid var(--target-color);
-      box-shadow: 0 0 6px var(--target-color);
-      background: conic-gradient(#fff, var(--target-color) 30deg, var(--target-color) 60deg, #fff 100deg);
+      box-shadow: 0 0 4px var(--target-color);
+      background: conic-gradient(from 0deg, transparent, var(--target-color) 30deg, var(--target-color) 60deg, transparent 100deg);
       -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
       -webkit-mask-composite: xor;
               mask-composite: exclude;
       animation: rotateHighlight 8s linear infinite;
       pointer-events: none;
+      opacity: 0.8;
     }
     @keyframes rotateHighlight {
       to { transform: rotate(1turn); }
@@ -655,6 +656,6 @@
   }
 
   </script>
-  <footer><small>버전 v1.3.18</small></footer>
+  <footer><small>버전 v1.3.19</small></footer>
 </body>
 </html>
