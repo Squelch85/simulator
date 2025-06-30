@@ -26,7 +26,7 @@
       --control-hover: #3a3a3a;
       --shadow: rgba(0,0,0,0.5);
     }
-    body { margin:0; padding:16px; font-family:sans-serif; background:var(--bg-color); color:var(--text-color); }
+    body { margin:0; padding:16px; font-family:sans-serif; background:var(--bg-color); color:var(--text-color); transition: background-color .3s, color .3s; }
     h2 { text-align:center; margin-bottom:16px; font-weight:bold; }
     button, input { font-family:inherit; font-size:1em; }
     .item-card { background:var(--container-bg); border:1px solid var(--border-color); border-radius:8px; padding:8px; margin-bottom:8px; display:flex; flex-direction:column; gap:6px; font-size:0.9em; }
@@ -36,7 +36,7 @@
     .item-header .info div:first-child { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .controls { display:flex; flex-wrap:wrap; gap:4px; justify-content:flex-end; }
     .item-card .controls { display:grid; grid-template-columns:repeat(5,1fr); gap:4px; }
-    .controls button { padding:4px; background:var(--control-bg); border:1px solid var(--border-color); border-radius:4px; color:var(--text-color); font-weight:bold; cursor:pointer; }
+    .controls button { padding:4px; background:var(--control-bg); border:1px solid var(--border-color); border-radius:4px; color:var(--text-color); font-weight:bold; cursor:pointer; transition: background .3s; }
     .item-card .controls button { width:100%; }
     .controls button:hover { background:var(--control-hover); }
     input[type=number] { width:50px; padding:4px; background:var(--container-bg); border:1px solid var(--border-color); border-radius:4px; color:var(--text-color); text-align:center; }
@@ -49,7 +49,7 @@
     .top-controls input { flex:1; min-width:120px; }
     .search { padding:6px; background:var(--container-bg); border:1px solid var(--border-color); border-radius:4px; color:var(--text-color); }
     .theme-toggle { position:fixed; top:8px; right:8px; }
-    .theme-toggle button { background:none; border:none; font-size:1.5rem; color:var(--text-color); cursor:pointer; }
+    .theme-toggle button { background:none; border:none; font-size:1.5rem; filter: grayscale(100%); cursor:pointer; transition: filter .3s; color:var(--text-color); }
     .home-link { position:fixed; top:8px; left:8px; color:var(--text-color); text-decoration:none; font-weight:bold; }
     .table-wrapper{ display:none; }
     @media (min-width:768px){
@@ -190,6 +190,6 @@ document.getElementById('themeBtn').addEventListener('click',toggleTheme);
 
 updateTotal();
 </script>
-  <footer><small>버전 v1.3.9</small></footer>
+  <footer><small>버전 v1.3.17</small></footer>
 </body>
 </html>

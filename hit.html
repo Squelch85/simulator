@@ -29,7 +29,7 @@
       transition: background-color .3s, color .3s;
     }
     .theme-toggle { position: fixed; top: 8px; right: 8px; }
-    .theme-toggle button { background: none; border: none; font-size: 1.5rem; color: var(--text-color); cursor: pointer; }
+    .theme-toggle button { background: none; border: none; font-size: 1.5rem; filter: grayscale(100%); cursor: pointer; transition: filter .3s; color: var(--text-color); }
     .home-link { position: fixed; top: 8px; left: 8px; color: var(--text-color); text-decoration: none; font-weight: bold; }
     .slider-group {
       margin: 1em 0;
@@ -128,6 +128,6 @@
 
     window.onload = update;
   </script>
-  <footer><small>버전 v1.3.9</small></footer>
+  <footer><small>버전 v1.3.17</small></footer>
 </body>
 </html>

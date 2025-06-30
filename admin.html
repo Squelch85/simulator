@@ -29,9 +29,9 @@
     body { margin:0; padding:16px; font-family:sans-serif; background:var(--bg-color); color:var(--text-color); text-align:center; transition:background-color .3s, color .3s; }
     .home-link { position:fixed; top:8px; left:8px; color:var(--text-color); text-decoration:none; font-weight:bold; }
     .theme-toggle { position:fixed; top:8px; right:8px; }
-    .theme-toggle button { background:none; border:none; font-size:1.5rem; color:var(--text-color); cursor:pointer; }
+    .theme-toggle button { background:none; border:none; font-size:1.5rem; filter:grayscale(100%); cursor:pointer; transition:filter .3s; color:var(--text-color); }
     .controls { display:flex; flex-wrap:wrap; gap:4px; justify-content:center; margin-bottom:8px; }
-    .controls select, .controls input, .controls button { padding:4px; font-size:1rem; background:var(--control-bg); border:1px solid var(--border-color); border-radius:4px; color:var(--text-color); }
+    .controls select, .controls input, .controls button { padding:4px; font-size:1rem; background:var(--control-bg); border:1px solid var(--border-color); border-radius:4px; color:var(--text-color); transition: background .3s; }
     .controls button:hover { background:var(--control-hover); }
     .slot { position:relative; width:100px; height:100px; margin:0 auto 8px; background:var(--container-bg); border:1px solid var(--border-color); display:flex; align-items:center; justify-content:center; overflow:visible; }
     .card { position:relative; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:bold; font-size:0.8rem; }
@@ -84,7 +84,7 @@
     </div>
   </div>
   <button id="testBtn">파괴 효과 테스트</button>
-  <footer><small>버전 v1.3.9</small></footer>
+  <footer><small>버전 v1.3.17</small></footer>
   <script>
   const imgDiv = document.querySelector('.card .img');
   const nameDiv = document.querySelector('.card .name');

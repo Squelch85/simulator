@@ -38,6 +38,7 @@
       height: 100vh;
       overflow: hidden;
       text-align: center;
+      transition: background-color .3s, color .3s;
     }
     .title {
       font-size: 3rem;
@@ -74,7 +75,7 @@
     }
     .menu a:hover { background: #ffd55c; }
     .theme-toggle { position: absolute; top: 10px; right: 10px; }
-    .theme-btn { background: none; border: none; font-size: 1.5rem; color: var(--text-color); cursor: pointer; }
+    .theme-btn { background: none; border: none; font-size: 1.5rem; filter: grayscale(100%); cursor: pointer; transition: filter .3s; color: var(--text-color); }
     footer { text-align:center; font-size:0.8rem; color: var(--text-color); margin-top:8px; }
   </style>
 </head>
@@ -233,6 +234,6 @@
     });
     document.getElementById('toggleTheme').addEventListener('click', () => document.documentElement.classList.toggle('dark'));
   </script>
-  <footer><small>버전 v1.3.16</small></footer>
+  <footer><small>버전 v1.3.17</small></footer>
 </body>
 </html>

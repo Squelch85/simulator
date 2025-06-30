@@ -51,7 +51,7 @@
     }
     #reg-controls button { width: 100%; }
     .reset-row { grid-column: 1 / -1; display: flex; justify-content: center; gap: 4px; }
-    .controls button { padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 0.8rem; }
+    .controls button { padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 0.8rem; transition: background .3s; }
     .controls button:hover { background: var(--control-hover); }
     #resetBtn, #maxBtn { padding: 12px 8px; }
     #enhance-bar { display: flex; gap: 4px; margin-bottom: 8px; }
@@ -125,10 +125,10 @@
     .maintain { animation: maintainFlash 0.6s; }
     .guide { margin: 4px 0; font-size: 0.9rem; color: var(--text-color); }
     .run-controls { display: flex; gap: 4px; justify-content: center; margin-bottom: 8px; }
-    .run-controls button { flex:1; padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 1rem; }
+    .run-controls button { flex:1; padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 1rem; transition: background .3s; }
     .run-controls button:hover { background: var(--control-hover); }
     .select-controls { display: flex; gap: 4px; justify-content: center; margin-bottom: 8px; }
-    .select-controls button { flex:1; padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 1rem; }
+    .select-controls button { flex:1; padding: 8px; background: var(--control-bg); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-color); font-size: 1rem; transition: background .3s; }
     .select-controls button:hover { background: var(--control-hover); }
     @keyframes successFlash {
       0% { background: var(--safe-color); transform: scale(1); box-shadow: 0 0 0 0 var(--safe-color); }
@@ -648,6 +648,6 @@
   }
 
   </script>
-  <footer><small>버전 v1.3.15</small></footer>
+  <footer><small>버전 v1.3.17</small></footer>
 </body>
 </html>
