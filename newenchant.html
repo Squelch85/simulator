@@ -31,11 +31,12 @@
       color: var(--text-color);
       font-family: sans-serif;
       padding: 2rem;
+      transition: background-color .3s, color .3s;
     }
     table { border-collapse: collapse; width: 100%; max-width: 600px; margin-bottom: 1rem; }
     th, td { border: 1px solid var(--border-color); padding: .5rem; text-align: center; }
     select { width: 100%; padding: .3rem; background: var(--control-bg); color: var(--text-color); border: 1px solid var(--border-color); }
-    button { padding: .6rem 1.2rem; font-size: 1rem; background: var(--control-bg); color: var(--text-color); border: 1px solid var(--border-color); cursor: pointer; }
+    button { padding: .6rem 1.2rem; font-size: 1rem; background: var(--control-bg); color: var(--text-color); border: 1px solid var(--border-color); cursor: pointer; transition: background .3s; }
     button:hover { background: var(--control-hover); }
     #result p { margin: .3rem 0; }
     @media (max-width: 600px) {
@@ -46,7 +47,7 @@
       td:before { position: absolute; top: 0; left: 0; width: 45%; padding-right: .5rem; white-space: nowrap; content: attr(data-label); font-weight: bold; }
     }
     .theme-toggle { position: absolute; top: 10px; right: 10px; }
-    .theme-btn { background: none; border: none; font-size: 1.5rem; color: var(--text-color); cursor: pointer; }
+    .theme-btn { background: none; border: none; font-size: 1.5rem; filter: grayscale(100%); cursor: pointer; transition: filter .3s; color: var(--text-color); }
     footer { text-align: center; font-size: 0.8rem; color: var(--text-color); margin-top: 1rem; }
   </style>
 </head>
@@ -160,6 +161,6 @@
     document.getElementById('toggleTheme').addEventListener('click', () =>
       document.documentElement.classList.toggle('dark'));
   </script>
-  <footer><small>버전 v1.3.16</small></footer>
+  <footer><small>버전 v1.3.17</small></footer>
 </body>
 </html>
