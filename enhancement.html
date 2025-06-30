@@ -171,6 +171,7 @@
     <button onclick="selectSameLevel()">동일등급선택</button>
     <button onclick="deselectAll()">선택해제</button>
   </div>
+  <div id="usage-summary" class="guide"></div>
 
   <script src="enhance_rates.js" defer></script>
   <script>
@@ -187,6 +188,15 @@
     let entryGrid;
     let selectedTarget = 1;
     let lastSelectedId = null;
+    let usage = { normal: 0, bless: 0, harkini: 0 };
+    let currentType = null;
+
+    function renderSummary() {
+      const el = document.getElementById('usage-summary');
+      if (el) {
+        el.textContent = `기본:${usage.normal} 하르키니:${usage.harkini} 축복:${usage.bless}`;
+      }
+    }
 
     function initialLevelFor(type) {
       return (type === '페르디타' || type === '유물') ? 5 : 0;
@@ -233,6 +243,7 @@
         .addEventListener('click', () =>
           document.documentElement.classList.toggle('dark'));
       updateHarkiniButton();
+      renderSummary();
 
     });
 
@@ -263,6 +274,11 @@
         alert('동일한 유형만 등록 가능합니다.');
         return;
       }
+      if (!entries.length && currentType && currentType !== type) {
+        usage = { normal: 0, bless: 0, harkini: 0 };
+        renderSummary();
+      }
+      if (!entries.length) currentType = type;
       if (entries.length >= 40) return;
       entries.push({
         id: Date.now() + Math.random(),
@@ -340,6 +356,9 @@
       entries.length = 0;
       renderEntries();
       selectedTarget = 0;
+      usage = { normal: 0, bless: 0, harkini: 0 };
+      currentType = null;
+      renderSummary();
       updateStepBar();
     }
 
@@ -458,6 +477,10 @@
       const targets = selectedEntries();
       renderEntries();
 
+      const realTargets = targets.filter(it => !it.destroyed);
+      usage.harkini += realTargets.length;
+      renderSummary();
+
       const promises = targets.map(item => {
         if (item.destroyed) return Promise.resolve();
         const result = getEnhanceResult({ ...item, scroll: '하르키니' });
@@ -494,6 +517,19 @@
           });
         }
         renderEntries();
+
+      const realTargets = targets.filter(item => {
+        if (item.destroyed) return false;
+        if (useTarget) {
+          if (item.level >= selectedTarget) return false;
+          if (item.level < item.safeLevel && selectedTarget >= item.safeLevel) {
+            return false;
+          }
+        }
+        return true;
+      });
+      usage[bless ? 'bless' : 'normal'] += realTargets.length;
+      renderSummary();
 
       const promises = targets.map(item => {
         if (item.destroyed) return Promise.resolve();
