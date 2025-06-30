@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-store">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>신축 기술부여 개대값</title>
+  <style>
+    :root {
+      --bg-color: #f4f4f4;
+      --text-color: #000000;
+      --container-bg: #ffffff;
+      --border-color: #dddddd;
+      --control-bg: #eeeeee;
+      --control-hover: #dddddd;
+      --shadow: rgba(0,0,0,0.1);
+    }
+    html.dark {
+      --bg-color: #121212;
+      --text-color: #e0e0e0;
+      --container-bg: #1e1e1e;
+      --border-color: #333333;
+      --control-bg: #2c2c2c;
+      --control-hover: #3a3a3a;
+      --shadow: rgba(0,0,0,0.5);
+    }
+    body {
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: sans-serif;
+      padding: 2rem;
+    }
+    table { border-collapse: collapse; width: 100%; max-width: 600px; margin-bottom: 1rem; }
+    th, td { border: 1px solid var(--border-color); padding: .5rem; text-align: center; }
+    select { width: 100%; padding: .3rem; background: var(--control-bg); color: var(--text-color); border: 1px solid var(--border-color); }
+    button { padding: .6rem 1.2rem; font-size: 1rem; background: var(--control-bg); color: var(--text-color); border: 1px solid var(--border-color); cursor: pointer; }
+    button:hover { background: var(--control-hover); }
+    #result p { margin: .3rem 0; }
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr { display: block; }
+      th { position: absolute; top: -9999px; left: -9999px; }
+      tr { margin: .5rem 0; }
+      td { border: none; position: relative; padding-left: 50%; text-align: left; }
+      td:before { position: absolute; top: 0; left: 0; width: 45%; padding-right: .5rem; white-space: nowrap; content: attr(data-label); font-weight: bold; }
+    }
+    .theme-toggle { position: absolute; top: 10px; right: 10px; }
+    .theme-btn { background: none; border: none; font-size: 1.5rem; color: var(--text-color); cursor: pointer; }
+    footer { text-align: center; font-size: 0.8rem; color: var(--text-color); margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="theme-toggle"><button id="toggleTheme" class="theme-btn">🌙</button></div>
+  <h1>신축 기술부여 개대값</h1>
+  <p>1회 시도 시 1~3단계 일반 및 추가 옵션이 동시에 결정되는 구조를 반영하여, 전체 확률과 기대 시도 횟수를 계산합니다.</p>
+  <table>
+    <thead>
+      <tr><th>단계</th><th>일반 옵션</th><th>추가 옵션</th></tr>
+    </thead>
+    <tbody>
+      <tr><td data-label="단계">1단계</td><td data-label="일반 옵션"><select id="s1-primary"></select></td><td data-label="추가 옵션"><select id="s1-additional"></select></td></tr>
+      <tr><td data-label="단계">2단계</td><td data-label="일반 옵션"><select id="s2-primary"></select></td><td data-label="추가 옵션"><select id="s2-additional"></select></td></tr>
+      <tr><td data-label="단계">3단계</td><td data-label="일반 옵션"><select id="s3-primary"></select></td><td data-label="추가 옵션"><select id="s3-additional"></select></td></tr>
+    </tbody>
+  </table>
+  <button id="calc-btn">계산하기</button>
+  <div id="result"></div>
+
+  <script>
+    const data = {
+      "1": {
+        primary: [
+          {name:"불꽃 저항", value:2, prob:6.46, grade:"고급"}, {name:"불꽃 저항", value:3, prob:5.95, grade:"희귀"},
+          {name:"불꽃 저항", value:5, prob:2.55, grade:"영웅"}, {name:"불꽃 저항", value:8, prob:2.04, grade:"전설"},
+          {name:"파도 저항", value:2, prob:6.46, grade:"고급"}, {name:"파도 저항", value:3, prob:5.95, grade:"희귀"},
+          {name:"파도 저항", value:5, prob:2.55, grade:"영웅"}, {name:"파도 저항", value:8, prob:2.04, grade:"전설"},
+          {name:"돌풍 저항", value:2, prob:6.46, grade:"고급"}, {name:"돌풍 저항", value:3, prob:5.95, grade:"희귀"},
+          {name:"돌풍 저항", value:5, prob:2.55, grade:"영웅"}, {name:"돌풍 저항", value:8, prob:2.04, grade:"전설"},
+          {name:"바위 저항", value:2, prob:6.46, grade:"고급"}, {name:"바위 저항", value:3, prob:5.95, grade:"희귀"},
+          {name:"바위 저항", value:5, prob:2.55, grade:"영웅"}, {name:"바위 저항", value:8, prob:2.04, grade:"전설"},
+          {name:"번개 저항", value:2, prob:6.46, grade:"고급"}, {name:"번개 저항", value:3, prob:5.95, grade:"희귀"},
+          {name:"번개 저항", value:5, prob:2.55, grade:"영웅"}, {name:"번개 저항", value:8, prob:2.04, grade:"전설"}
+        ],
+        additional: [
+          {name:"명중", value:2, prob:6.46, grade:"고급"}, {name:"명중", value:3, prob:5.95, grade:"희귀"},
+          {name:"명중", value:5, prob:2.55, grade:"영웅"}, {name:"명중", value:7, prob:2.04, grade:"전설"}
+        ]
+      },
+      "2": {
+        primary: [
+          {name:"받는 치유량", value:17, prob:6.46, grade:"고급"}, {name:"받는 치유량", value:20, prob:5.95, grade:"희귀"},
+          {name:"받는 치유량", value:30, prob:2.55, grade:"영웅"}, {name:"받는 치유량", value:50, prob:2.04, grade:"전설"},
+          {name:"받는 치유율", value:3, prob:6.46, grade:"고급"}, {name:"받는 치유율", value:4, prob:5.95, grade:"희귀"},
+          {name:"받는 치유율", value:6, prob:2.55, grade:"영웅"}, {name:"받는 치유율", value:10, prob:2.04, grade:"전설"},
+          {name:"모든 속성 저항", value:2, prob:6.46, grade:"고급"}, {name:"모든 속성 저항", value:3, prob:5.95, grade:"희귀"},
+          {name:"모든 속성 저항", value:5, prob:2.55, grade:"영웅"}, {name:"모든 속성 저항", value:8, prob:2.04, grade:"전설"},
+          {name:"일반 공격력 저항", value:2, prob:6.46, grade:"고급"}, {name:"일반 공격력 저항", value:3, prob:5.95, grade:"희귀"},
+          {name:"일반 공격력 저항", value:5, prob:2.55, grade:"영웅"}, {name:"일반 공격력 저항", value:8, prob:2.04, grade:"전설"},
+          {name:"기술 공격력 저항", value:2, prob:6.46, grade:"고급"}, {name:"기술 공격력 저항", value:3, prob:5.95, grade:"희귀"},
+          {name:"기술 공격력 저항", value:5, prob:2.55, grade:"영웅"}, {name:"기술 공격력 저항", value:8, prob:2.04, grade:"전설"}
+        ],
+        additional: [
+          {name:"방어력", value:2, prob:6.46, grade:"고급"}, {name:"방어력", value:3, prob:5.95, grade:"희귀"},
+          {name:"방어력", value:5, prob:2.55, grade:"영웅"}, {name:"방어력", value:7, prob:2.04, grade:"전설"}
+        ]
+      },
+      "3": {
+        primary: [
+          {name:"물약 회복률", value:3, prob:8.075, grade:"고급"}, {name:"물약 회복률", value:4, prob:7.4375, grade:"희귀"},
+          {name:"물약 회복률", value:6, prob:3.1875, grade:"영웅"}, {name:"물약 회복률", value:10, prob:2.55, grade:"전설"},
+          {name:"연쇄 피해 저항", value:2, prob:8.075, grade:"고급"}, {name:"연쇄 피해 저항", value:3, prob:7.4375, grade:"희귀"},
+          {name:"연쇄 피해 저항", value:4, prob:3.1875, grade:"영웅"}, {name:"연쇄 피해 저항", value:7, prob:2.55, grade:"전설"},
+          {name:"관통 피해 저항", value:2, prob:8.075, grade:"고급"}, {name:"관통 피해 저항", value:3, prob:7.4375, grade:"희귀"},
+          {name:"관통 피해 저항", value:4, prob:3.1875, grade:"영웅"}, {name:"관통 피해 저항", value:7, prob:2.55, grade:"전설"}
+        ],
+        additional: [
+          {name:"피해 감소", value:3, prob:8.075, grade:"고급"}, {name:"피해 감소", value:4, prob:7.4375, grade:"희귀"},
+          {name:"피해 감소", value:6, prob:3.1875, grade:"영웅"}, {name:"피해 감소", value:10, prob:2.55, grade:"전설"}
+        ]
+      }
+    };
+
+    const gradeColor = {"고급":"#8BC34A","희귀":"#2196F3","영웅":"#F44336","전설":"#FFC107"};
+
+    function fill(id, list) {
+      const sel = document.getElementById(id);
+      sel.innerHTML = "";
+      sel.append(new Option("선택안함",""));
+      list.slice().sort((a,b)=>{ const na=a.name, nb=b.name; return na===nb ? a.value-b.value : na.localeCompare(nb,'ko'); })
+          .forEach(o=>{
+        const opt=new Option(`${o.name} ${o.value}`,o.prob);
+        opt.style.color=gradeColor[o.grade]||'var(--text-color)'; sel.append(opt);
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', ()=>{
+      ['1','2','3'].forEach(s=>{
+        fill(`s${s}-primary`, data[s].primary);
+        fill(`s${s}-additional`, data[s].additional);
+      });
+    });
+
+    document.getElementById('calc-btn').addEventListener('click',()=>{
+      const picks=[];
+      ['1','2','3'].forEach(s=>{ ['primary','additional'].forEach(type=>{
+        const sel=document.getElementById(`s${s}-${type}`);
+        if(sel.value) picks.push(data[s][type].find(x=>x.prob===parseFloat(sel.value)));
+      }); });
+      if(!picks.length) return alert('옵션을 하나 이상 선택해 주세요.');
+      const totalProb=picks.reduce((a,p)=>a*(p.prob/100),1);
+      const expected=(1/totalProb).toFixed(2);
+      let html='';
+      picks.forEach(p=>{
+        html+=`<p style="color:${gradeColor[p.grade]}">등급: ${p.grade} – ${p.name} ${p.value} (${p.prob}%)</p>`;
+      });
+      html+=`<hr><p>전체 확률: ${(totalProb*100).toFixed(4)}%</p>`;
+      html+=`<p><strong>기대 시도 횟수: ${expected} 회</strong></p>`;
+      document.getElementById('result').innerHTML=html;
+    });
+    document.getElementById('toggleTheme').addEventListener('click', () =>
+      document.documentElement.classList.toggle('dark'));
+  </script>
+  <footer><small>버전 v1.3.16</small></footer>
+</body>
+</html>

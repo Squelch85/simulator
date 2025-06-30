@@ -1,7 +1,7 @@
 import re
 import unittest
 
-HTML_FILES = ['index.html', 'gift.html', 'hit.html', 'points.html', 'enhancement.html']
+HTML_FILES = ['index.html', 'gift.html', 'hit.html', 'points.html', 'enhancement.html', 'newenchant.html']
 
 class TestDarkMode(unittest.TestCase):
     def test_dark_mode_support(self):
