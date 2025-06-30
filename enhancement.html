@@ -345,12 +345,13 @@
 
     function fillMax() {
       if (!entries.length) return;
-      const { type, safeLevel, scroll, level } = entries[0];
+      const { type, safeLevel, scroll } = entries[0];
+      const baseLevel = initialLevelFor(type);
       while (entries.length < 40) {
         entries.push({
           id: Date.now() + Math.random(),
           type,
-          level,
+          level: baseLevel,
           safeLevel,
           scroll,
           destroyed: false,
@@ -535,6 +536,6 @@
   }
 
   </script>
-  <footer><small>버전 v1.3.11</small></footer>
+  <footer><small>버전 v1.3.12</small></footer>
 </body>
 </html>
