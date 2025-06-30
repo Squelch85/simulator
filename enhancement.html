@@ -433,6 +433,7 @@
         card.appendChild(overlay);
         overlay.addEventListener('animationend', () => {
           overlay.remove();
+          card.remove();
           res();
         }, { once: true });
       });
@@ -530,6 +531,6 @@
   }
 
   </script>
-  <footer><small>버전 v1.3.9</small></footer>
+  <footer><small>버전 v1.3.10</small></footer>
 </body>
 </html>
