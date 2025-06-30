@@ -172,6 +172,7 @@
     <button onclick="deselectAll()">선택해제</button>
   </div>
   <div id="usage-summary" class="guide"></div>
+  <div id="entry-summary" class="guide"></div>
 
   <script src="enhance_rates.js" defer></script>
   <script>
@@ -189,12 +190,17 @@
     let selectedTarget = 1;
     let lastSelectedId = null;
     let usage = { normal: 0, bless: 0, harkini: 0 };
+    let consumed = 0;
     let currentType = null;
 
     function renderSummary() {
       const el = document.getElementById('usage-summary');
       if (el) {
         el.textContent = `기본:${usage.normal} 하르키니:${usage.harkini} 축복:${usage.bless}`;
+      }
+      const entryEl = document.getElementById('entry-summary');
+      if (entryEl) {
+        entryEl.textContent = `엔트리소모:${consumed}`;
       }
     }
 
@@ -276,6 +282,7 @@
       }
       if (!entries.length && currentType && currentType !== type) {
         usage = { normal: 0, bless: 0, harkini: 0 };
+        consumed = 0;
         renderSummary();
       }
       if (!entries.length) currentType = type;
@@ -357,6 +364,7 @@
       renderEntries();
       selectedTarget = 0;
       usage = { normal: 0, bless: 0, harkini: 0 };
+      consumed = 0;
       currentType = null;
       renderSummary();
       updateStepBar();
@@ -500,11 +508,14 @@
 
       await Promise.all(promises);
 
+      const before = entries.length;
       for (let i = entries.length - 1; i >= 0; i--) {
         if (entries[i].destroyed) entries.splice(i, 1);
       }
+      consumed += before - entries.length;
       renderEntries();
       updateStepBar();
+      renderSummary();
     }
 
     async function enhanceOnce(bless = false, useTarget = false) {
@@ -557,11 +568,14 @@
 
       await Promise.all(promises);
 
+      const before = entries.length;
       for (let i = entries.length - 1; i >= 0; i--) {
         if (entries[i].destroyed) entries.splice(i, 1);
       }
+      consumed += before - entries.length;
       renderEntries();
       updateStepBar();
+      renderSummary();
     }
 
   async function enhanceAllSteps() {
@@ -572,6 +586,6 @@
   }
 
   </script>
-  <footer><small>버전 v1.3.12</small></footer>
+  <footer><small>버전 v1.3.13</small></footer>
 </body>
 </html>
