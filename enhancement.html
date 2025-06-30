@@ -188,6 +188,10 @@
     let selectedTarget = 1;
     let lastSelectedId = null;
 
+    function initialLevelFor(type) {
+      return (type === '페르디타' || type === '유물') ? 5 : 0;
+    }
+
     function populateControls() {
       updateButtons();
     }
@@ -263,7 +267,7 @@
       entries.push({
         id: Date.now() + Math.random(),
         type,
-        level: 0,
+        level: initialLevelFor(type),
         safeLevel,
         scroll,
         destroyed: false,
@@ -341,12 +345,12 @@
 
     function fillMax() {
       if (!entries.length) return;
-      const { type, safeLevel, scroll } = entries[0];
+      const { type, safeLevel, scroll, level } = entries[0];
       while (entries.length < 40) {
         entries.push({
           id: Date.now() + Math.random(),
           type,
-          level: 0,
+          level,
           safeLevel,
           scroll,
           destroyed: false,
@@ -531,6 +535,6 @@
   }
 
   </script>
-  <footer><small>버전 v1.3.10</small></footer>
+  <footer><small>버전 v1.3.11</small></footer>
 </body>
 </html>
