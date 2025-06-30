@@ -164,6 +164,7 @@
     <button onclick="decreaseAll()">-1</button>
     <button onclick="enhanceOnce()">+1</button>
     <button id="harkiniBtn" onclick="enhanceHarkiniOnce()" disabled>하르키니</button>
+    <button id="kaleilBtn" onclick="enhanceKaleilOnce()" disabled>칼레일</button>
     <button onclick="enhanceOnce(true)">축복</button>
     <button onclick="enhanceAllSteps()">다중강화</button>
   </div>
@@ -189,14 +190,14 @@
     let entryGrid;
     let selectedTarget = 1;
     let lastSelectedId = null;
-    let usage = { normal: 0, bless: 0, harkini: 0 };
+    let usage = { normal: 0, bless: 0, harkini: 0, kaleil: 0 };
     let consumed = 0;
     let currentType = null;
 
     function renderSummary() {
       const el = document.getElementById('usage-summary');
       if (el) {
-        el.textContent = `기본:${usage.normal} 하르키니:${usage.harkini} 축복:${usage.bless}`;
+        el.textContent = `기본:${usage.normal} 하르키니:${usage.harkini} 칼레일:${usage.kaleil} 축복:${usage.bless}`;
       }
       const entryEl = document.getElementById('entry-summary');
       if (entryEl) {
@@ -249,6 +250,7 @@
         .addEventListener('click', () =>
           document.documentElement.classList.toggle('dark'));
       updateHarkiniButton();
+      updateKaleilButton();
       renderSummary();
 
     });
@@ -270,6 +272,7 @@
         el.classList.toggle('break',    !!breakable);
       });
       updateHarkiniButton();
+      updateKaleilButton();
     }
 
 
@@ -281,7 +284,7 @@
         return;
       }
       if (!entries.length && currentType && currentType !== type) {
-        usage = { normal: 0, bless: 0, harkini: 0 };
+        usage = { normal: 0, bless: 0, harkini: 0, kaleil: 0 };
         consumed = 0;
         renderSummary();
       }
@@ -358,12 +361,13 @@
         }
       });
       updateHarkiniButton();
+      updateKaleilButton();
     }
     function resetAll() {
       entries.length = 0;
       renderEntries();
       selectedTarget = 0;
-      usage = { normal: 0, bless: 0, harkini: 0 };
+      usage = { normal: 0, bless: 0, harkini: 0, kaleil: 0 };
       consumed = 0;
       currentType = null;
       renderSummary();
@@ -476,9 +480,19 @@
       return !!window.enhanceRates['하르키니']?.[first?.type]?.[first?.safeLevel]?.[String(first?.level)];
     }
 
+    function canUseKaleil() {
+      const first = entries[0];
+      return !!window.enhanceRates['칼레일']?.[first?.type]?.[first?.safeLevel]?.[String(first?.level)];
+    }
+
     function updateHarkiniButton() {
       const btn = document.getElementById('harkiniBtn');
       if (btn) btn.disabled = !canUseHarkini();
+    }
+
+    function updateKaleilButton() {
+      const btn = document.getElementById('kaleilBtn');
+      if (btn) btn.disabled = !canUseKaleil();
     }
 
     async function enhanceHarkiniOnce() {
@@ -492,6 +506,43 @@
       const promises = targets.map(item => {
         if (item.destroyed) return Promise.resolve();
         const result = getEnhanceResult({ ...item, scroll: '하르키니' });
+        item.destroyed = result.destroyed;
+        const card = document.querySelector(`.card[data-id="${item.id}"]`);
+        if (result.success) {
+          item.level += result.increment;
+          return waitForAnim(card, 'success');
+        } else if (result.destroyed) {
+          return shatterCard(card);
+        } else if (result.increment < 0) {
+          item.level = Math.max(0, item.level + result.increment);
+          return waitForAnim(card, 'fail');
+        }
+        return waitForAnim(card, 'maintain');
+      });
+
+      await Promise.all(promises);
+
+      const before = entries.length;
+      for (let i = entries.length - 1; i >= 0; i--) {
+        if (entries[i].destroyed) entries.splice(i, 1);
+      }
+      consumed += before - entries.length;
+      renderEntries();
+      updateStepBar();
+      renderSummary();
+    }
+
+    async function enhanceKaleilOnce() {
+      const targets = selectedEntries();
+      renderEntries();
+
+      const realTargets = targets.filter(it => !it.destroyed);
+      usage.kaleil += realTargets.length;
+      renderSummary();
+
+      const promises = targets.map(item => {
+        if (item.destroyed) return Promise.resolve();
+        const result = getEnhanceResult({ ...item, scroll: '칼레일' });
         item.destroyed = result.destroyed;
         const card = document.querySelector(`.card[data-id="${item.id}"]`);
         if (result.success) {
@@ -586,6 +637,6 @@
   }
 
   </script>
-  <footer><small>버전 v1.3.13</small></footer>
+  <footer><small>버전 v1.3.14</small></footer>
 </body>
 </html>
