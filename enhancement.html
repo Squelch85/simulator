@@ -150,10 +150,16 @@
       100% { background: inherit; transform: scale(1); box-shadow: none; }
     }
     @media (max-width: 600px) {
+      h1 { font-size: 1.2rem; }
       #reg-controls { grid-template-columns: repeat(4, 1fr); }
-      #entry-grid { grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); }
-      .slot { max-width: 50px; }
-      .card { font-size: 0.6rem; }
+      #reg-controls button { font-size: 0.53rem; padding: 4px; }
+      #entry-grid { grid-template-columns: repeat(auto-fill, minmax(35px, 1fr)); gap: 2px; }
+      .slot { max-width: 40px; }
+      .card { font-size: 0.55rem; }
+      .run-controls button,
+      .select-controls button { font-size: 0.66rem; padding: 6px; }
+      #enhance-bar { overflow-x: auto; }
+      #enhance-bar .step { flex: 0 0 calc(100% / 12 - 4px); }
     }
   </style>
 </head>
@@ -667,7 +673,6 @@
   }
 
   </script>
-  <footer><small>버전 v1.3.22</small></footer>
-모바일-최적화된-화면-구현
+  <footer><small>버전 v1.3.23</small></footer>
 </body>
 </html>
