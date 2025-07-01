@@ -149,6 +149,12 @@
       50% { background: var(--target-color); transform: scale(1.02); box-shadow: 0 0 6px 3px var(--target-color); }
       100% { background: inherit; transform: scale(1); box-shadow: none; }
     }
+    @media (max-width: 600px) {
+      #reg-controls { grid-template-columns: repeat(4, 1fr); }
+      #entry-grid { grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); }
+      .slot { max-width: 50px; }
+      .card { font-size: 0.6rem; }
+    }
   </style>
 </head>
 <body>
@@ -182,6 +188,7 @@
   <script src="enhance_rates.js" defer></script>
   <script>
     const entries = [];
+    const MAX_ENTRIES = window.matchMedia('(max-width: 600px)').matches ? 20 : 40;
     const typeImages = {
       '무기': 'img/weapon.gif',
       '방어구': 'img/armor.gif',
@@ -237,7 +244,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       entryGrid = document.getElementById('entry-grid');
-      for (let i = 0; i < 40; i++) {
+      for (let i = 0; i < MAX_ENTRIES; i++) {
         const slot = document.createElement('div');
         slot.className = 'slot';
         entryGrid.appendChild(slot);
@@ -293,7 +300,7 @@
         renderSummary();
       }
       if (!entries.length) currentType = type;
-      if (entries.length >= 40) return;
+      if (entries.length >= MAX_ENTRIES) return;
       entries.push({
         id: Date.now() + Math.random(),
         type,
@@ -387,7 +394,7 @@
       if (!entries.length) return;
       const { type, safeLevel, scroll } = entries[0];
       const baseLevel = initialLevelFor(type);
-      while (entries.length < 40) {
+      while (entries.length < MAX_ENTRIES) {
         entries.push({
           id: Date.now() + Math.random(),
           type,
@@ -660,6 +667,6 @@
   }
 
   </script>
-  <footer><small>버전 v1.3.21</small></footer>
+  <footer><small>버전 v1.3.22</small></footer>
 </body>
 </html>
