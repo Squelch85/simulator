@@ -56,7 +56,7 @@
     #resetBtn, #maxBtn { padding: 12px 8px; }
     #enhance-bar { display: flex; gap: 4px; margin-bottom: 8px; }
     .step { flex: 1; padding: 4px; text-align: center; border: 1px solid var(--border-color); background: var(--control-bg); cursor: pointer; }
-    .step.selected { outline: 2px solid var(--target-color); }
+    .step.selected { outline: 2px solid var(--target-color); outline-offset: -2px; }
     .step.safe { background: var(--safe-color); }
     .step.break { background: var(--break-color); }
     #entry-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 4px; margin-bottom: 8px; justify-items: center; }
@@ -152,12 +152,12 @@
     @media (max-width: 600px) {
       h1 { font-size: 1.2rem; }
       #reg-controls { grid-template-columns: repeat(4, 1fr); }
-      #reg-controls button { font-size: 0.53rem; padding: 4px; }
+      #reg-controls button { font-size: 0.58rem; padding: 4.4px; }
       #entry-grid { grid-template-columns: repeat(auto-fill, minmax(35px, 1fr)); gap: 2px; }
       .slot { max-width: 40px; }
       .card { font-size: 0.55rem; }
       .run-controls button,
-      .select-controls button { font-size: 0.66rem; padding: 6px; }
+      .select-controls button { font-size: 0.73rem; padding: 6.6px; }
       #enhance-bar { overflow-x: auto; }
       #enhance-bar .step { flex: 0 0 calc(100% / 12 - 4px); }
     }
@@ -194,7 +194,7 @@
   <script src="enhance_rates.js" defer></script>
   <script>
     const entries = [];
-    const MAX_ENTRIES = window.matchMedia('(max-width: 600px)').matches ? 20 : 40;
+    const MAX_ENTRIES = 40;
     const typeImages = {
       '무기': 'img/weapon.gif',
       '방어구': 'img/armor.gif',
@@ -673,6 +673,6 @@
   }
 
   </script>
-  <footer><small>버전 v1.3.23</small></footer>
+  <footer><small>버전 v1.3.24</small></footer>
 </body>
 </html>
