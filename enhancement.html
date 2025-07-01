@@ -121,10 +121,10 @@
       height: 100%;
       object-fit: contain;
       pointer-events: none;
-      animation: shatterFade 0.35s forwards;
+      animation: shatterFade 0.45s forwards;
     }
     @keyframes shatterFade { to { opacity:0; transform:scale(1.2); } }
-    .success { animation: successFlash 0.6s; }
+    .success { animation: successFlash 0.45s; }
     .fail { animation: failFlash 0.6s; }
     .maintain { animation: maintainFlash 0.6s; }
     .guide { margin: 4px 0; font-size: 0.9rem; color: var(--text-color); }
@@ -493,7 +493,7 @@
         setTimeout(() => {
           img.remove();
           res();
-        }, 350);
+        }, 450);
       });
     }
 
@@ -654,11 +654,12 @@
   async function enhanceAllSteps() {
     while (selectedEntries().some(it => !it.destroyed && it.level < selectedTarget)) {
       await enhanceOnce(false, true);
+      await new Promise(r => setTimeout(r, 150));
       await new Promise(r => requestAnimationFrame(r));
     }
   }
 
   </script>
-  <footer><small>버전 v1.3.20</small></footer>
+  <footer><small>버전 v1.3.21</small></footer>
 </body>
 </html>
