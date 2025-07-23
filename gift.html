@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-store">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>7월 마법이 부여된 특별 상자 시뮬레이터</title>
+  <title>행운의 뽑기 시즌3 시뮬레이터</title>
   <style>
     :root {
       --bg-color: #f4f4f4;
@@ -58,7 +58,7 @@
   </div>
   <div class="container">
     <a href="index.html">&larr; 홈으로</a>
-    <h1>7월 마법이 부여된 특별 상자 시뮬레이터</h1>
+    <h1>행운의 뽑기 시즌3 시뮬레이터</h1>
     <div class="controls">
       <button data-delta="-100">-100</button>
       <button data-delta="-10">-10</button>
@@ -73,23 +73,23 @@
     const toggleBtn = document.getElementById('toggleTheme');
     toggleBtn.addEventListener('click', () => document.documentElement.classList.toggle('dark'));
     const items = [
-      { name: '아키움 결정 2,000개', rate: 5 },
-      { name: '아키움 조각 100,000개', rate: 10 },
-      { name: '다루의 주화 50,000개', rate: 12.5 },
-      { name: '정원의 조각 5개', rate: 12 },
-      { name: '신속 비약 2개', rate: 10 },
-      { name: '눈부신 정원의 조각 5개', rate: 5 },
-      { name: '별의 조각 3개', rate: 7.5 },
-      { name: '축복받은 탈것 조련술 교본 5개', rate: 10 },
-      { name: '단결의 증표 100,000개', rate: 7.5 },
-      { name: '노랑 초승돌 2단계 1개', rate: 5 },
-      { name: '분홍 초승돌 1단계 1개', rate: 5 },
-      { name: '희귀 소환권 선택 상자 1개', rate: 2.5 },
-      { name: '기록자의 인장 50개', rate: 3 },
-      { name: '희귀 정원의 잎새 1개', rate: 4 },
-      { name: '영웅 정원의 잎새 1개', rate: 1 }
+      { name: '에아나드의 장신구 랜덤 상자 (귀속) 1개', rate: 0.0007 },
+      { name: '에아나드의 장신구 랜덤 상자 II (귀속) 1개', rate: 0.0014 },
+      { name: '에아나드의 방어구 랜덤 상자 (귀속) 1개', rate: 0.0012 },
+      { name: '에아나드의 방어구 랜덤 상자 II (귀속) 1개', rate: 0.003 },
+      { name: '에아나드의 무기 선택 상자 II (귀속) 1개', rate: 0.0055 },
+      { name: '하르키니의 강화 주문서 선택 상자 1개', rate: 0.01 },
+      { name: '전설 소환권 선택 상자 (귀속) 1개', rate: 0.1 },
+      { name: '영웅 무기 환영 소환권 (1회) (귀속) 1개', rate: 0.5 },
+      { name: '호라의 마법부여석 선택 상자 (귀속) 1개', rate: 0.9 },
+      { name: '동대륙 주화 (귀속) 10개', rate: 14 },
+      { name: '아스티의 특별 소환권 (11회) 선택 상자 (귀속) 1개', rate: 2.5 },
+      { name: '찬란한 소환권 (11회) 선택 상자 (귀속) 2개', rate: 15 },
+      { name: '11회 소환권 선택 상자 (귀속) 5개', rate: 7.5 },
+      { name: '7월 럭키 박스 (귀속) 1개', rate: 26.5 },
+      { name: '눈부신 무기 환영 소환권 (11회) (귀속) 1개', rate: 32.9782 }
     ];
-    const colorMap = Object.fromEntries(items.map(it => [it.name, it.rate <= 5 ? 'yellow' : 'red']));
+    const colorMap = Object.fromEntries(items.map(it => [it.name, it.rate <= 1 ? 'yellow' : 'red']));
     function getRarity(rate) { if (rate <= 0.01) return 6; if (rate <= 0.1) return 5; if (rate <= 1) return 4; if (rate <= 3) return 3; if (rate <= 10) return 2; return 1; }
     let cum = 0;
     const cumulative = items.map(item => ({ ...item, threshold: (cum += item.rate) / 100, rank: getRarity(item.rate) }));
@@ -106,7 +106,11 @@
         for (let it of counts) if (r <= it.threshold) { it.count++; break; }
       }
       counts.sort((a, b) => ((b.count > 0) - (a.count > 0)) || (b.rank - a.rank));
-      const blinkNames = ['아키움 결정 2,000개','아키움 조각 100,000개','다루의 주화 50,000개'];
+      const blinkNames = [
+        '에아나드의 장신구 랜덤 상자 (귀속) 1개',
+        '에아나드의 장신구 랜덤 상자 II (귀속) 1개',
+        '에아나드의 방어구 랜덤 상자 (귀속) 1개'
+      ];
       let html = '<table><thead><tr><th>아이템</th><th>기대수</th><th>획득수</th></tr></thead><tbody>';
       counts.forEach(it => {
         const exp = (it.rate / 100 * trials).toFixed(2);
@@ -122,6 +126,6 @@
       document.getElementById('results').innerHTML = html;
     });
   </script>
-  <footer><small>버전 v1.3.27</small></footer>
+  <footer><small>버전 v1.3.28</small></footer>
 </body>
 </html>
