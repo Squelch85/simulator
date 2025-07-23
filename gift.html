@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-store">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>6월 선물상자 시뮬레이터</title>
+  <title>7월 마법이 부여된 특별 상자 시뮬레이터</title>
   <style>
     :root {
       --bg-color: #f4f4f4;
@@ -58,7 +58,7 @@
   </div>
   <div class="container">
     <a href="index.html">&larr; 홈으로</a>
-    <h1>6월선물하기 시뮬레이터</h1>
+    <h1>7월 마법이 부여된 특별 상자 시뮬레이터</h1>
     <div class="controls">
       <button data-delta="-100">-100</button>
       <button data-delta="-10">-10</button>
@@ -73,35 +73,23 @@
     const toggleBtn = document.getElementById('toggleTheme');
     toggleBtn.addEventListener('click', () => document.documentElement.classList.toggle('dark'));
     const items = [
-      { name: '염원 정기', rate: 0.0030 },
-      { name: '고결 방어구상자', rate: 0.0100 },
-      { name: '강화 주문서상자', rate: 0.0200 },
-      { name: '잉크(전설)', rate: 0.0900 },
-      { name: '전설 장비상자', rate: 0.1000 },
-      { name: '영웅 무기소환권', rate: 0.3000 },
-      { name: '전설 소환권상자', rate: 0.1000 },
-      { name: '전설 파편', rate: 0.5500 },
-      { name: '영웅 파편', rate: 3.0000 },
-      { name: '마법부여석상자', rate: 1.0000 },
-      { name: '아스티 특별소환권상자', rate: 3.5000 },
-      { name: '찬란 소환권×2', rate: 18.0000 },
-      { name: '희귀 잎새', rate: 4.5000 },
-      { name: '영웅 잎새', rate: 1.5000 },
-      { name: '별 조각×10', rate: 8.5000 },
-      { name: '잔재×300', rate: 15.0000 },
-      { name: '인장×5000', rate: 0.0050 },
-      { name: '인장×300', rate: 0.5000 },
-      { name: '인장×100', rate: 3.0000 },
-      { name: '인장×50', rate: 13.0000 },
-      { name: '무기권×100', rate: 0.0100 },
-      { name: '무기권×5', rate: 1.0000 },
-      { name: '무기권×1', rate: 26.3120 }
+      { name: '아키움 결정 2,000개', rate: 5 },
+      { name: '아키움 조각 100,000개', rate: 10 },
+      { name: '다루의 주화 50,000개', rate: 12.5 },
+      { name: '정원의 조각 5개', rate: 12 },
+      { name: '신속 비약 2개', rate: 10 },
+      { name: '눈부신 정원의 조각 5개', rate: 5 },
+      { name: '별의 조각 3개', rate: 7.5 },
+      { name: '축복받은 탈것 조련술 교본 5개', rate: 10 },
+      { name: '단결의 증표 100,000개', rate: 7.5 },
+      { name: '노랑 초승돌 2단계 1개', rate: 5 },
+      { name: '분홍 초승돌 1단계 1개', rate: 5 },
+      { name: '희귀 소환권 선택 상자 1개', rate: 2.5 },
+      { name: '기록자의 인장 50개', rate: 3 },
+      { name: '희귀 정원의 잎새 1개', rate: 4 },
+      { name: '영웅 정원의 잎새 1개', rate: 1 }
     ];
-    const colorMap = {
-      '전설 소환권상자':'yellow','전설 파편':'yellow','염원 정기':'yellow','고결 방어구상자':'yellow','잉크(전설)':'yellow','전설 장비상자':'yellow',
-      '영웅 무기소환권':'red','인장×300':'red','무기권×5':'red','영웅 파편':'red','영웅 잎새':'red','인장×100':'red','아스티 특별소환권상자':'red','별 조각×10':'red','찬란 소환권×2':'red','인장×50':'red','무기권×1':'red','인장×5000':'red','무기권×100':'red',
-      '희귀 잎새':'blue','마법부여석상자':'grey','잔재×300':'grey','강화 주문서상자':'grey'
-    };
+    const colorMap = Object.fromEntries(items.map(it => [it.name, it.rate <= 5 ? 'yellow' : 'red']));
     function getRarity(rate) { if (rate <= 0.01) return 6; if (rate <= 0.1) return 5; if (rate <= 1) return 4; if (rate <= 3) return 3; if (rate <= 10) return 2; return 1; }
     let cum = 0;
     const cumulative = items.map(item => ({ ...item, threshold: (cum += item.rate) / 100, rank: getRarity(item.rate) }));
@@ -118,7 +106,7 @@
         for (let it of counts) if (r <= it.threshold) { it.count++; break; }
       }
       counts.sort((a, b) => ((b.count > 0) - (a.count > 0)) || (b.rank - a.rank));
-      const blinkNames = ['염원 정기','고결 방어구상자','잉크(전설)','전설 장비상자'];
+      const blinkNames = ['아키움 결정 2,000개','아키움 조각 100,000개','다루의 주화 50,000개'];
       let html = '<table><thead><tr><th>아이템</th><th>기대수</th><th>획득수</th></tr></thead><tbody>';
       counts.forEach(it => {
         const exp = (it.rate / 100 * trials).toFixed(2);
@@ -134,6 +122,6 @@
       document.getElementById('results').innerHTML = html;
     });
   </script>
-  <footer><small>버전 v1.3.26</small></footer>
+  <footer><small>버전 v1.3.27</small></footer>
 </body>
 </html>
