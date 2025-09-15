@@ -148,6 +148,7 @@
       const segmentCount = path.length - 1;
       let startTime;
       let mouth = 0;
+      const frameTimes = [];
       function drawPacman(x = pacX, y = pacY) {
         const angle = 0.25 + Math.abs(Math.sin(mouth)) * 0.25;
         ctx.fillStyle = "yellow";
@@ -175,6 +176,8 @@
         ctx.fill();
       }
       function animate(timestamp) {
+        const { abs, sin, hypot } = Math;
+        const frameStart = performance.now();
         if (!startTime) startTime = timestamp;
         const t = Math.min((timestamp - startTime) / duration, 1);
         const seg = Math.min(Math.floor(t * segmentCount), segmentCount - 1);
@@ -185,22 +188,29 @@
         monsterY = monsterPath[seg].y + (monsterPath[seg+1].y - monsterPath[seg].y) * tt;
         ctx.fillStyle = getComputedStyle(document.body).getPropertyValue("--bg-color") || "#000";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        dots = dots.filter(d => {
+        ctx.fillStyle = '#ffd700';
+        let write = 0;
+        for (let i = 0; i < dots.length; i++) {
+          const d = dots[i];
           const dx = d.x - pacX;
           const dy = d.y - pacY;
-          if (Math.hypot(dx, dy) < pacRadius - 2) return false;
-          ctx.beginPath();
-          ctx.arc(d.x, d.y, step / 2 - 1, 0, Math.PI * 2);
-          ctx.fillStyle = '#ffd700';
-          ctx.fill();
-          return true;
-        });
+          if (hypot(dx, dy) >= pacRadius - 2) {
+            dots[write++] = d;
+            ctx.beginPath();
+            ctx.arc(d.x, d.y, step / 2 - 1, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        dots.length = write;
         drawPacman();
         drawMonster();
+        frameTimes.push(performance.now() - frameStart);
         if (t >= 1) return setTimeout(finish, 500);
         requestAnimationFrame(animate);
       }
       function finish() {
+        const avg = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
+        console.log('평균 프레임 시간:', avg.toFixed(3), 'ms');
         const flipDur = 500;
         let flipStart;
         function flipAnim(ts) {
@@ -235,6 +245,6 @@
     });
     document.getElementById('toggleTheme').addEventListener('click', () => document.documentElement.classList.toggle('dark'));
   </script>
-  <footer><small>버전 v1.3.30</small></footer>
+  <footer><small>버전 v1.3.31</small></footer>
 </body>
 </html>
