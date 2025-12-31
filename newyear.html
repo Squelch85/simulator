@@ -58,10 +58,12 @@
     .theme-toggle { position: absolute; top: 10px; right: 10px; }
     .theme-btn { background: none; border: none; font-size: 1.5rem; filter: grayscale(100%); cursor: pointer; transition: filter .3s; color: var(--text-color); }
     .theme-btn:hover { filter: grayscale(0%); }
-    .controls { display: flex; gap: 4px; align-items: center; margin: 0.75rem 0; }
-    .controls button { flex: 1; padding: 0.35rem; font-size: 0.9rem; font-weight: bold; border: 1px solid var(--border-color); border-radius: 4px; background: var(--control-bg); color: var(--text-color); cursor: pointer; transition: background .3s; }
+    .controls { display: flex; gap: 4px; align-items: center; margin: 0.75rem 0; flex-wrap: wrap; }
+    .controls button { flex: 1; padding: 0.35rem; font-size: 0.9rem; font-weight: bold; border: 1px solid var(--border-color); border-radius: 4px; background: var(--control-bg); color: var(--text-color); cursor: pointer; transition: background .3s; min-width: 88px; }
     .controls button:hover { background: var(--control-hover); }
-    .controls input { width: 90px; padding: 0.35rem; font-size: 0.95rem; text-align: center; border: 1px solid var(--border-color); border-radius: 4px; background: var(--container-bg); color: var(--text-color); }
+    .controls input, .controls select { padding: 0.35rem; font-size: 0.95rem; text-align: center; border: 1px solid var(--border-color); border-radius: 4px; background: var(--container-bg); color: var(--text-color); }
+    .controls select { min-width: 280px; text-align-last: left; }
+    .controls input { width: 90px; }
     #runBtn { width: 100%; padding: 0.55rem; font-size: 1rem; background-color: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 0.75rem; }
     #runBtn:hover { background-color: #0056b3; }
     table { width: 100%; border-collapse: collapse; }
@@ -99,8 +101,9 @@
   <div class="container">
     <a href="index.html">&larr; 홈으로</a>
     <h1>신년 행복 염원 상자 시뮬레이터</h1>
-    <p class="note">신년 행복 염원 상자 (귀속) 및 웹상점 패키지에서 획득 가능한 보상과 확률을 그대로 반영했습니다.</p>
-    <div class="controls">
+    <p id="simulationDescription" class="note">신년 행복 염원 상자 (귀속) 및 웹상점 패키지에서 획득 가능한 보상과 확률을 그대로 반영했습니다.</p>
+    <div class="controls" aria-label="시뮬레이션 선택 및 반복 설정">
+      <select id="simulationSelect" aria-label="시뮬레이션 선택"></select>
       <button data-delta="-1000">-1000</button>
       <button data-delta="-100">-100</button>
       <button data-delta="-10">-10</button>
@@ -137,27 +140,53 @@
     const toggleBtn = document.getElementById('toggleTheme');
     toggleBtn.addEventListener('click', () => document.documentElement.classList.toggle('dark'));
 
-    const BASE_ITEMS = [
-      { name: '에아나드 장비 선택 상자 (귀속) 1개', rate: 0.0002 },
-      { name: '에아나드의 보조 방어구 랜덤 상자 1개', rate: 0.0003 },
-      { name: '하르키니의 강화 주문서 선택 상자 1개', rate: 0.01 },
-      { name: '에아나드의 잉크 (전설) 1개', rate: 0.07 },
-      { name: '전설 장비 선택 상자 1개', rate: 0.01 },
-      { name: '봉인된 방어구 랜덤 상자 (귀속) 1개', rate: 0.15 },
-      { name: '영웅 무기 환영 소환권 (1회) (귀속) 1개', rate: 0.4 },
-      { name: '전설 소환권 선택 상자 (귀속) 1개', rate: 0.1 },
-      { name: '호라의 마법부여석 선택 상자 (귀속) 1개', rate: 0.7 },
-      { name: '전설 위상의 파편 (귀속) 1개', rate: 0.25 },
-      { name: '영웅 위상의 파편 (귀속) 1개', rate: 1.5 },
-      { name: '+5 장신구 선택 상자 (귀속) 1개', rate: 10 },
-      { name: '아스티의 특별 소환권 (11회) 선택 상자 (귀속) 1개', rate: 0.75 },
-      { name: '영롱한 소환권 (11회) 선택 상자 (귀속) 1개', rate: 28.5 },
-      { name: '기록자의 인장 (귀속) 10,000개', rate: 0.003 },
-      { name: '기록자의 인장 (귀속) 100개', rate: 16 },
-      { name: '그릇된 자의 잔재 (귀속) 800개', rate: 12 },
-      { name: '눈부신 무기 환영 소환권 (11회) (귀속) 1,000개', rate: 0.0003 },
-      { name: '눈부신 무기 환영 소환권 (11회) (귀속) 5개', rate: 1 },
-      { name: '눈부신 무기 환영 소환권 (11회) (귀속) 2개', rate: 28.5562 },
+    const SIMULATIONS = [
+      {
+        id: 'newyear',
+        label: '신년 행복 염원 상자 (귀속)',
+        description: '신년 행복 염원 상자 (귀속) 및 웹상점 패키지에서 획득 가능한 보상과 확률을 그대로 반영했습니다.',
+        items: [
+          { name: '에아나드 장비 선택 상자 (귀속) 1개', rate: 0.0002 },
+          { name: '에아나드의 보조 방어구 랜덤 상자 1개', rate: 0.0003 },
+          { name: '하르키니의 강화 주문서 선택 상자 1개', rate: 0.01 },
+          { name: '에아나드의 잉크 (전설) 1개', rate: 0.07 },
+          { name: '전설 장비 선택 상자 1개', rate: 0.01 },
+          { name: '봉인된 방어구 랜덤 상자 (귀속) 1개', rate: 0.15 },
+          { name: '영웅 무기 환영 소환권 (1회) (귀속) 1개', rate: 0.4 },
+          { name: '전설 소환권 선택 상자 (귀속) 1개', rate: 0.1 },
+          { name: '호라의 마법부여석 선택 상자 (귀속) 1개', rate: 0.7 },
+          { name: '전설 위상의 파편 (귀속) 1개', rate: 0.25 },
+          { name: '영웅 위상의 파편 (귀속) 1개', rate: 1.5 },
+          { name: '+5 장신구 선택 상자 (귀속) 1개', rate: 10 },
+          { name: '아스티의 특별 소환권 (11회) 선택 상자 (귀속) 1개', rate: 0.75 },
+          { name: '영롱한 소환권 (11회) 선택 상자 (귀속) 1개', rate: 28.5 },
+          { name: '기록자의 인장 (귀속) 10,000개', rate: 0.003 },
+          { name: '기록자의 인장 (귀속) 100개', rate: 16 },
+          { name: '그릇된 자의 잔재 (귀속) 800개', rate: 12 },
+          { name: '눈부신 무기 환영 소환권 (11회) (귀속) 1,000개', rate: 0.0003 },
+          { name: '눈부신 무기 환영 소환권 (11회) (귀속) 5개', rate: 1 },
+          { name: '눈부신 무기 환영 소환권 (11회) (귀속) 2개', rate: 28.5562 },
+        ],
+      },
+      {
+        id: 'specialSummon',
+        label: '스페셜 소환권 랜덤 상자 (귀속)',
+        description: '스페셜 소환권 랜덤 상자 (귀속) — 아듀 2025 패키지 구매 시 획득, 사용 시 획득 확률을 반영했습니다.',
+        items: [
+          { name: '영롱한 소환권 (11회) 선택 상자 (귀속) 100개', rate: 0.01 },
+          { name: '영롱한 소환권 (11회) 선택 상자 (귀속) 10개', rate: 1 },
+          { name: '영롱한 소환권 (11회) 선택 상자 (귀속) 2개', rate: 4 },
+          { name: '영롱한 소환권 (11회) 선택 상자 (귀속) 1개', rate: 20 },
+          { name: '눈부신 무기 환영 소환권 (11회) (귀속) 100개', rate: 0.01 },
+          { name: '눈부신 무기 환영 소환권 (11회) (귀속) 10개', rate: 1 },
+          { name: '눈부신 무기 환영 소환권 (11회) (귀속) 2개', rate: 4 },
+          { name: '눈부신 무기 환영 소환권 (11회) (귀속) 1개', rate: 35 },
+          { name: '지배자의 영롱한 탈것 소환권 (11회) (귀속) 100개', rate: 0.01 },
+          { name: '지배자의 영롱한 탈것 소환권 (11회) (귀속) 10개', rate: 1 },
+          { name: '지배자의 영롱한 탈것 소환권 (11회) (귀속) 2개', rate: 4 },
+          { name: '지배자의 영롱한 탈것 소환권 (11회) (귀속) 1개', rate: 29.97 },
+        ],
+      },
     ];
 
     const rarityMeta = {
@@ -196,6 +225,12 @@
 
     const formatCount = (count) => count.toLocaleString();
 
+    const sortByAscendingRate = (items) =>
+      [...items].sort((a, b) =>
+        a.rate - b.rate ||
+        a.name.localeCompare(b.name)
+      );
+
     const decorateWithThreshold = (items) => {
       let cumulative = 0;
       return items.map(item => {
@@ -204,7 +239,7 @@
       });
     };
 
-    const tableData = decorateWithThreshold(BASE_ITEMS);
+    const buildTableData = (items) => decorateWithThreshold(sortByAscendingRate(items));
 
     const renderRarityBadge = (rarityKey) => {
       const { label, className } = rarityMeta[rarityKey];
@@ -212,6 +247,9 @@
     };
 
     const renderNameWithRarity = (item) => `<span class="rarity-text ${rarityMeta[item.rarity].className}">${item.name}</span>`;
+
+    let tableData = buildTableData(SIMULATIONS[0].items);
+    let activeSimulationId = SIMULATIONS[0].id;
 
     const renderProbabilityTable = () => {
       const tbody = document.getElementById('probabilityTable');
@@ -242,9 +280,10 @@
     const renderResults = (trials, results) => {
       const filtered = results.filter(item => item.count > 0);
       const sorted = filtered.sort((a, b) =>
-        b.rate - a.rate ||
+        a.rate - b.rate ||
         b.count - a.count ||
-        rarityPriority[b.rarity] - rarityPriority[a.rarity]
+        rarityPriority[b.rarity] - rarityPriority[a.rarity] ||
+        a.name.localeCompare(b.name)
       );
       const rows = sorted.map(item => {
         const expected = formatExpected(item.rate / 100 * trials);
@@ -277,6 +316,34 @@
       `;
     };
 
+    const simulationSelect = document.getElementById('simulationSelect');
+    SIMULATIONS.forEach(sim => {
+      const option = document.createElement('option');
+      option.value = sim.id;
+      option.textContent = sim.label;
+      simulationSelect.appendChild(option);
+    });
+    simulationSelect.value = activeSimulationId;
+
+    const simulationDescription = document.getElementById('simulationDescription');
+    const resetResultsMessage = () => {
+      document.getElementById('results').textContent = '시뮬레이션을 실행하면 여기에서 기대값과 실제 획득 수를 비교할 수 있습니다.';
+    };
+
+    const applySimulation = (simulationId) => {
+      const nextSimulation = SIMULATIONS.find(sim => sim.id === simulationId) || SIMULATIONS[0];
+      activeSimulationId = nextSimulation.id;
+      tableData = buildTableData(nextSimulation.items);
+      simulationDescription.textContent = nextSimulation.description;
+      simulationSelect.value = activeSimulationId;
+      resetResultsMessage();
+      renderProbabilityTable();
+    };
+
+    simulationSelect.addEventListener('change', (event) => {
+      applySimulation(event.target.value);
+    });
+
     document.querySelectorAll('.controls button').forEach(button => {
       button.addEventListener('click', () => {
         const input = document.getElementById('trials');
@@ -307,8 +374,9 @@
       renderResults(trials, results);
     });
 
+    resetResultsMessage();
     renderProbabilityTable();
   </script>
-  <footer><small>버전 v1.3.36 - 확률 내림차순 정렬 및 획득 항목 표시 조건 개선</small></footer>
+  <footer><small>버전 v1.3.37 - 시뮬레이션 선택 추가 및 확률 오름차순 정렬 일괄 적용</small></footer>
 </body>
 </html>
