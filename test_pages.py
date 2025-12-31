@@ -5,10 +5,8 @@ import unittest
 
 HTML_FILES = [
     'index.html',
-    'gift.html',
-    'summer.html',
+    'newyear.html',
     'hit.html',
-    'points.html',
     'enhancement.html',
     'newenchant.html',
 ]
@@ -31,4 +29,3 @@ class TestDarkMode(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
