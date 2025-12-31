@@ -69,6 +69,26 @@
     th { background-color: var(--th-bg); }
     .note { font-size: 0.9rem; color: var(--text-color); }
     .muted { font-size: 0.85rem; color: #a0a0a0; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .subtle-btn { padding: 0.35rem 0.55rem; font-size: 0.85rem; border: 1px solid var(--border-color); border-radius: 4px; background: var(--control-bg); color: var(--text-color); cursor: pointer; transition: background .3s, color .3s, border-color .3s; }
+    .subtle-btn:hover { background: var(--control-hover); }
+    .table-panel { margin-top: 0.5rem; }
+    .table-panel[hidden] { display: none; }
+    .rarity { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+    .rarity::before { content: '●'; font-size: 0.8rem; }
+    .rarity.legendary { color: #ffd86b; text-shadow: 0 0 6px rgba(255, 216, 107, 0.65); animation: fadePulse 1.8s ease-in-out infinite; }
+    .rarity.heroic { color: #ff6b6b; }
+    .rarity.rare { color: #5aa6ff; }
+    .rarity.common { color: #f1f1f1; text-shadow: 0 0 4px rgba(0, 0, 0, 0.55); }
+    .rarity-text.legendary { color: #ffd86b; text-shadow: 0 0 6px rgba(255, 216, 107, 0.65); animation: fadePulse 1.8s ease-in-out infinite; }
+    .rarity-text.heroic { color: #ff6b6b; }
+    .rarity-text.rare { color: #5aa6ff; }
+    .rarity-text.common { color: #f1f1f1; text-shadow: 0 0 4px rgba(0, 0, 0, 0.55); }
+    @keyframes fadePulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.55; }
+      100% { opacity: 1; }
+    }
     footer { text-align:center; font-size:0.8rem; color: var(--text-color); margin-top:8px; }
   </style>
 </head>
@@ -84,22 +104,28 @@
       <button data-delta="-1000">-1000</button>
       <button data-delta="-100">-100</button>
       <button data-delta="-10">-10</button>
-      <input type="number" id="trials" min="1" value="1000">
+      <input type="number" id="trials" min="1" value="100">
       <button data-delta="10">+10</button>
       <button data-delta="100">+100</button>
       <button data-delta="1000">+1000</button>
     </div>
     <button id="runBtn">시뮬레이션 실행</button>
+    <div class="muted">기본 시도 횟수는 100회로 설정되어 있습니다.</div>
 
     <section>
-      <h2>기본 획득 확률</h2>
-      <div class="muted">합계는 100%가 되도록 검증했습니다.</div>
-      <table>
-        <thead>
-          <tr><th>아이템</th><th>확률</th></tr>
-        </thead>
-        <tbody id="probabilityTable"></tbody>
-      </table>
+      <div class="section-header">
+        <h2>기본 획득 확률</h2>
+        <button id="toggleProbability" class="subtle-btn" aria-expanded="false">확률표 펼치기</button>
+      </div>
+      <div id="probabilityPanel" class="table-panel" hidden>
+        <div class="muted">합계는 100%가 되도록 검증했습니다.</div>
+        <table>
+          <thead>
+            <tr><th>등급</th><th>아이템</th><th>확률</th></tr>
+          </thead>
+          <tbody id="probabilityTable"></tbody>
+        </table>
+      </div>
     </section>
 
     <section>
@@ -134,6 +160,20 @@
       { name: '눈부신 무기 환영 소환권 (11회) (귀속) 2개', rate: 28.5562 },
     ];
 
+    const rarityMeta = {
+      legendary: { label: '전설', className: 'legendary' },
+      heroic: { label: '영웅', className: 'heroic' },
+      rare: { label: '희귀', className: 'rare' },
+      common: { label: '일반', className: 'common' },
+    };
+
+    const getRarityKey = (rate) => {
+      if (rate < 0.01) return 'legendary';
+      if (rate < 0.1) return 'heroic';
+      if (rate < 1) return 'rare';
+      return 'common';
+    };
+
     const formatRate = (rate) => {
       if (rate >= 1) return `${rate.toFixed(4)}%`;
       if (rate >= 0.01) return `${rate.toFixed(4)}%`;
@@ -153,21 +193,28 @@
       let cumulative = 0;
       return items.map(item => {
         cumulative += item.rate;
-        return { ...item, threshold: cumulative / 100 };
+        return { ...item, threshold: cumulative / 100, rarity: getRarityKey(item.rate) };
       });
     };
 
     const tableData = decorateWithThreshold(BASE_ITEMS);
 
+    const renderRarityBadge = (rarityKey) => {
+      const { label, className } = rarityMeta[rarityKey];
+      return `<span class="rarity ${className}">${label}</span>`;
+    };
+
+    const renderNameWithRarity = (item) => `<span class="rarity-text ${rarityMeta[item.rarity].className}">${item.name}</span>`;
+
     const renderProbabilityTable = () => {
       const tbody = document.getElementById('probabilityTable');
       const rows = tableData.map(item => (
-        `<tr><td>${item.name}</td><td>${formatRate(item.rate)}</td></tr>`
+        `<tr><td>${renderRarityBadge(item.rarity)}</td><td>${renderNameWithRarity(item)}</td><td>${formatRate(item.rate)}</td></tr>`
       )).join('');
       tbody.innerHTML = rows;
       const total = tableData.at(-1).threshold * 100;
       if (Math.abs(total - 100) > 0.0001) {
-        tbody.insertAdjacentHTML('beforeend', `<tr><td colspan="2">⚠️ 합계 경고: ${total.toFixed(6)}%</td></tr>`);
+        tbody.insertAdjacentHTML('beforeend', `<tr><td colspan="3">⚠️ 합계 경고: ${total.toFixed(6)}%</td></tr>`);
       }
     };
 
@@ -191,7 +238,8 @@
         const expected = formatExpected(item.rate / 100 * trials);
         const actualRate = trials ? `${(item.count / trials * 100).toFixed(4)}%` : '0%';
         return `<tr>
-          <td>${item.name}</td>
+          <td>${renderRarityBadge(item.rarity)}</td>
+          <td>${renderNameWithRarity(item)}</td>
           <td>${formatRate(item.rate)}</td>
           <td>${expected}</td>
           <td>${formatCount(item.count)}</td>
@@ -204,6 +252,7 @@
         <table>
           <thead>
             <tr>
+              <th>등급</th>
               <th>아이템</th>
               <th>기본 확률</th>
               <th>기대 수량</th>
@@ -224,6 +273,21 @@
       });
     });
 
+    const probabilityPanel = document.getElementById('probabilityPanel');
+    const toggleProbability = document.getElementById('toggleProbability');
+    toggleProbability.addEventListener('click', () => {
+      const isHidden = probabilityPanel.hasAttribute('hidden');
+      if (isHidden) {
+        probabilityPanel.removeAttribute('hidden');
+        toggleProbability.textContent = '확률표 접기';
+        toggleProbability.setAttribute('aria-expanded', 'true');
+      } else {
+        probabilityPanel.setAttribute('hidden', '');
+        toggleProbability.textContent = '확률표 펼치기';
+        toggleProbability.setAttribute('aria-expanded', 'false');
+      }
+    });
+
     document.getElementById('runBtn').addEventListener('click', () => {
       const trials = parseInt(document.getElementById('trials').value, 10);
       if (Number.isNaN(trials) || trials < 1) return;
@@ -233,6 +297,6 @@
 
     renderProbabilityTable();
   </script>
-  <footer><small>버전 v1.3.33</small></footer>
+  <footer><small>버전 v1.3.34 - 확률표 토글 및 희귀도 강조</small></footer>
 </body>
 </html>
