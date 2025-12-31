@@ -242,9 +242,9 @@
     const renderResults = (trials, results) => {
       const filtered = results.filter(item => item.count > 0);
       const sorted = filtered.sort((a, b) =>
-        rarityPriority[b.rarity] - rarityPriority[a.rarity] ||
+        b.rate - a.rate ||
         b.count - a.count ||
-        a.rate - b.rate
+        rarityPriority[b.rarity] - rarityPriority[a.rarity]
       );
       const rows = sorted.map(item => {
         const expected = formatExpected(item.rate / 100 * trials);
@@ -261,7 +261,7 @@
 
       document.getElementById('results').innerHTML = `
         <p>총 <strong>${trials.toLocaleString()}</strong>회 개봉 결과입니다.</p>
-        <table>
+        ${sorted.length ? `<table>
           <thead>
             <tr>
               <th>등급</th>
@@ -273,7 +273,7 @@
             </tr>
           </thead>
           <tbody>${rows}</tbody>
-        </table>
+        </table>` : '<p>획득된 보상이 없습니다.</p>'}
       `;
     };
 
@@ -309,6 +309,6 @@
 
     renderProbabilityTable();
   </script>
-  <footer><small>버전 v1.3.35 - 희소도 우선 정렬 및 희박 확률 표기 개선</small></footer>
+  <footer><small>버전 v1.3.36 - 확률 내림차순 정렬 및 획득 항목 표시 조건 개선</small></footer>
 </body>
 </html>
