@@ -167,6 +167,13 @@
       common: { label: '일반', className: 'common' },
     };
 
+    const rarityPriority = {
+      legendary: 3,
+      heroic: 2,
+      rare: 1,
+      common: 0,
+    };
+
     const getRarityKey = (rate) => {
       if (rate < 0.01) return 'legendary';
       if (rate < 0.1) return 'heroic';
@@ -182,7 +189,7 @@
 
     const formatExpected = (value) => {
       if (value === 0) return '0';
-      if (value < 0.01) return value.toExponential(2);
+      if (value < 0.01) return '매우희박';
       if (value < 1) return value.toFixed(4);
       return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
     };
@@ -233,7 +240,12 @@
     };
 
     const renderResults = (trials, results) => {
-      const sorted = results.slice().sort((a, b) => b.count - a.count || b.rate - a.rate);
+      const filtered = results.filter(item => item.count > 0);
+      const sorted = filtered.sort((a, b) =>
+        rarityPriority[b.rarity] - rarityPriority[a.rarity] ||
+        b.count - a.count ||
+        a.rate - b.rate
+      );
       const rows = sorted.map(item => {
         const expected = formatExpected(item.rate / 100 * trials);
         const actualRate = trials ? `${(item.count / trials * 100).toFixed(4)}%` : '0%';
@@ -297,6 +309,6 @@
 
     renderProbabilityTable();
   </script>
-  <footer><small>버전 v1.3.34 - 확률표 토글 및 희귀도 강조</small></footer>
+  <footer><small>버전 v1.3.35 - 희소도 우선 정렬 및 희박 확률 표기 개선</small></footer>
 </body>
 </html>
